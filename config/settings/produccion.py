@@ -33,13 +33,13 @@ else:
         }
     }
 
-# WhiteNoise con compresión y manifest para caché eficiente en Vercel
+# WhiteNoise con compresión (sin manifest para evitar desfase entre static-build y lambda en Vercel)
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
