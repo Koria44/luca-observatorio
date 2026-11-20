@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titulo %}Panel Fiscalizador — Luca{% endblock %}
+{% block contenido %}
+<div class="space-y-6">
+  <div class="space-y-1">
+    <span class="cinta-luca">Fiscalización municipal · PAC</span>
+    <h1 class="text-3xl sm:text-4xl">Panel del Fiscalizador Municipal</h1>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="rounded-tarjeta bg-tinte-cielo border border-tinta-900/10 shadow-luca p-5"><p class="text-xs font-bold uppercase tracking-wide text-tinta-700">Comercios por verificar</p><p class="text-4xl precio-destacado text-tinta-900">{{ cuentas_pend }}</p></div>
+    <div class="rounded-tarjeta bg-tinte-mantequilla border border-luca-400/50 shadow-luca p-5"><p class="text-xs font-bold uppercase tracking-wide text-tinta-900">Precios por revisar</p><p class="text-4xl precio-destacado text-tomate-600">{{ precios_pend }}</p></div>
+    <div class="rounded-tarjeta bg-tinte-durazno border border-tomate-600/20 shadow-luca p-5"><p class="text-xs font-bold uppercase tracking-wide text-tomate-600">Alertas atípicas (&gt;40%)</p><p class="text-4xl precio-destacado text-tomate-600">{{ alertas }}</p></div>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+    <a href="{% url 'precios:terreno' %}" class="btn-acento text-center text-sm">Precio en terreno</a>
+    <a href="{% url 'cuentas:cola_revision' %}" class="btn-primario text-center text-sm">Verificar comercios</a>
+    <a href="{% url 'precios:cola_revision' %}" class="btn-primario text-center text-sm">Revisar precios</a>
+    <a href="{% url 'catalogo:cola_imagenes' %}" class="btn-tinta text-center text-sm">Imágenes pendientes</a>
+    <a href="{% url 'auditoria:lista' %}" class="btn-secundario text-center text-sm">Ver auditoría</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Cómo funciona y transparencia — Luca{% endblock %}
+{% block contenido %}
+<div class="max-w-4xl mx-auto space-y-6">
+  <section class="tarjeta-luca space-y-3">
+    <h1 class="text-3xl">Cómo funciona Luca y de dónde vienen los precios</h1>
+    <p class="text-gris-700">
+      En <strong>Luca — Observatorio de Precios del Comercio Local de Pedro Aguirre Cerda</strong> creemos que la información de precios solo sirve si es clara, verificable y transparente (# REQ-13).
+    </p>
+  </section>
+
+  <section class="tarjeta-luca space-y-3">
+    <h2 class="text-2xl">1. Origen de cada precio</h2>
+    <ul class="list-disc pl-6 space-y-2 text-gris-700">
+      <li><strong>Levantado por fiscalizador municipal:</strong> precios observados directamente en terreno por funcionarios autorizados de DIDESE.</li>
+      <li><strong>Informado por el comercio:</strong> precios publicados por comerciantes locales registrados cuya cuenta pasó por verificación y aprobación.</li>
+      <li><strong>Dato de demostración basado en precio de referencia:</strong> series históricas generadas para fines académicos del prototipo sobre referencias de mercado RM/ODEPA, siempre rotuladas de forma visible.</li>
+    </ul>
+  </section>
+
+  <section class="tarjeta-luca space-y-3">
+    <h2 class="text-2xl">2. Condiciones de compra y stock</h2>
+    <p class="text-gris-700">
+      Cada tarjeta indica si una oferta exige compra mínima, un medio de pago específico o membresía. Además, los precios pueden cambiar en sala durante el día y la plataforma advierte expresamente cuando la <strong>disponibilidad (stock) no está confirmada</strong>.
+    </p>
+  </section>
+
+  <section class="tarjeta-luca space-y-3">
+    <h2 class="text-2xl">3. Validación y vigencia automática</h2>
+    <p class="text-gris-700">
+      Las ofertas vencidas dejan de mostrarse como activas automáticamente en la fecha de término, conservando siempre su registro en el historial de precios. Cuando un precio cambia más de ±40 % respecto a su valor anterior, se genera una alerta preventiva y pasa a revisión manual.
+    </p>
+  </section>
+</div>
+{% endblock %}

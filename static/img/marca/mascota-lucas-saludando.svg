@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 170" width="160" height="170" role="img" aria-labelledby="t-saluda d-saluda">
+  <title id="t-saluda">Mascota Lucas saludando</title>
+  <desc id="d-saluda">Moneda ámbar sonriente con lupa turquesa y brazos levantados dando la bienvenida.</desc>
+  <!-- Piernas -->
+  <path d="M 62 128 L 58 152 M 58 152 L 46 154" fill="none" stroke="#12385C" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 98 128 L 102 152 M 102 152 L 114 154" fill="none" stroke="#12385C" stroke-width="7" stroke-linecap="round"/>
+  <!-- Brazos (derecho saludando arriba) -->
+  <path d="M 35 88 Q 16 74 22 46" fill="none" stroke="#12385C" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="22" cy="44" r="6" fill="#F5A623" stroke="#12385C" stroke-width="4"/>
+  <path d="M 125 88 Q 140 98 134 114" fill="none" stroke="#12385C" stroke-width="7" stroke-linecap="round"/>
+  <!-- Cuerpo moneda -->
+  <circle cx="80" cy="80" r="48" fill="#F5A623" stroke="#12385C" stroke-width="6.5"/>
+  <circle cx="80" cy="80" r="38" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="14 8" opacity="0.7"/>
+  <!-- Lupa sonriente -->
+  <circle cx="78" cy="76" r="24" fill="#FFFFFF" stroke="#0F8B8D" stroke-width="7"/>
+  <circle cx="78" cy="76" r="24" fill="none" stroke="#12385C" stroke-width="3.5"/>
+  <circle cx="70" cy="72" r="3.5" fill="#12385C"/>
+  <circle cx="86" cy="72" r="3.5" fill="#12385C"/>
+  <path d="M 68 81 Q 78 91 88 81" fill="none" stroke="#12385C" stroke-width="4" stroke-linecap="round"/>
+  <!-- Pequeño pin coral en el pecho -->
+  <path d="M 108 98 C 113 98 117 102 117 107 C 117 113 108 122 108 122 C 108 122 99 113 99 107 C 99 102 103 98 108 98 Z" fill="#E4572E" stroke="#12385C" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="108" cy="107" r="2.8" fill="#FFFFFF"/>
+</svg>

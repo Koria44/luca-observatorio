@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block titulo %}Cola de revisión de imágenes — Luca{% endblock %}
+{% block contenido %}
+<div class="space-y-8">
+  <div>
+    <h1 class="text-3xl">Revisión de logos y fotos de productos</h1>
+    <p class="text-gris-700">Aprueba, fija como imagen principal o rechaza con motivo obligatorio (# REQ-01, REQ-02, REQ-15).</p>
+  </div>
+
+  {# Logos pendientes #}
+  <section class="space-y-3">
+    <h2 class="text-2xl">Logos de comercios en revisión ({{ logos_pend|length }})</h2>
+    {% for com in logos_pend %}
+      <article class="tarjeta-luca flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <img src="{% url 'catalogo:ver_pendiente' com.logo|cut:'pendientes/' %}" alt="Logo pendiente de {{ com.nombre_fantasia }}" class="w-24 h-24 rounded-xl object-contain border border-gris-200 bg-white">
+          <div>
+            <h3 class="text-xl">{{ com.nombre_fantasia }}</h3>
+            <p class="text-sm text-gris-700">Subido por: {{ com.propietario.email|default:"Comercio" }}</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <form method="post" action="{% url 'catalogo:decidir_logo' com.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="aprobar">
+            <button type="submit" class="btn-primario !py-2 !px-4 text-sm">✔ Aprobar logo</button>
+          </form>
+          <form method="post" action="{% url 'catalogo:decidir_logo' com.id %}" class="flex gap-2 items-center">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="rechazar">
+            <input type="text" name="motivo" required placeholder="Motivo de rechazo" aria-label="Motivo de rechazo" class="campo-entrada !py-2 text-sm w-48">
+            <button type="submit" class="btn-secundario !py-2 !px-3 text-sm text-rojo-600 border-rojo-600">Rechazar</button>
+          </form>
+        </div>
+      </article>
+    {% empty %}
+      <div class="tarjeta-luca text-sm text-gris-700">✔ No hay logos pendientes de revisión.</div>
+    {% endfor %}
+  </section>
+
+  {# Fotos de productos pendientes #}
+  <section class="space-y-3">
+    <h2 class="text-2xl">Fotos de productos en revisión ({{ fotos_pend|length }})</h2>
+    {% for img in fotos_pend %}
+      <article class="tarjeta-luca flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <img src="{% url 'catalogo:ver_pendiente' img.archivo_media|cut:'pendientes/' %}" alt="{{ img.texto_alternativo }}" class="w-28 h-28 rounded-xl object-contain border border-gris-200 bg-white">
+          <div class="space-y-1">
+            <h3 class="text-lg">{{ img.producto.nombre_completo }}</h3>
+            <p class="text-sm text-gris-700">Comercio: {{ img.comercio.nombre_fantasia|default:"—" }} · Subida por: {{ img.subida_por.email|default:"—" }}</p>
+            <p class="text-xs text-gris-700">Alt: "{{ img.texto_alternativo }}" ({{ img.ancho }}×{{ img.alto }} px)</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <form method="post" action="{% url 'catalogo:decidir_imagen' img.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="aprobar">
+            <button type="submit" class="btn-secundario !py-2 !px-3 text-sm">✔ Aprobar</button>
+          </form>
+          <form method="post" action="{% url 'catalogo:decidir_imagen' img.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="aprobar_principal">
+            <button type="submit" class="btn-primario !py-2 !px-3 text-sm">★ Aprobar y fijar principal</button>
+          </form>
+          <form method="post" action="{% url 'catalogo:decidir_imagen' img.id %}" class="flex gap-2 items-center">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="rechazar">
+            <select name="motivo" aria-label="Motivo de rechazo" class="campo-entrada !py-2 text-xs w-48">
+              {% for m in motivos_frecuentes %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+            </select>
+            <button type="submit" class="btn-secundario !py-2 !px-3 text-sm text-rojo-600 border-rojo-600">Rechazar</button>
+          </form>
+        </div>
+      </article>
+    {% empty %}
+      <div class="tarjeta-luca text-sm text-gris-700">✔ No hay fotos de productos pendientes.</div>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

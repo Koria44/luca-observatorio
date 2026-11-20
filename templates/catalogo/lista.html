@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}Catálogo de productos — Luca{% endblock %}
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-3xl">Catálogo maestro de productos</h1>
+      <p class="text-gris-700">{{ total }} productos registrados sin duplicados (# REQ-01).</p>
+    </div>
+    <a href="{% url 'catalogo:crear' %}" class="btn-primario">+ Nuevo producto</a>
+  </div>
+
+  <form method="get" class="tarjeta-luca grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <input type="search" name="q" value="{{ q }}" placeholder="Buscar por nombre, marca o EAN..." aria-label="Buscar producto" class="campo-entrada">
+    <select name="categoria" aria-label="Filtrar por categoría" class="campo-entrada">
+      <option value="">Todas las categorías</option>
+      {% for cat in categorias %}
+        <option value="{{ cat.id }}" {% if cat_id == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.icono }} {{ cat.nombre }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn-secundario">Filtrar catálogo</button>
+  </form>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {% for p in productos %}
+      <article class="tarjeta-luca flex items-start justify-between gap-3">
+        <div class="space-y-1">
+          <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-turquesa-100 text-turquesa-700">{{ p.categoria.icono }} {{ p.categoria.nombre }}</span>
+          <h2 class="text-lg">{{ p.nombre_completo }}</h2>
+          <p class="text-sm text-gris-700">Formato: {{ p.formato }} · Base: {{ p.contenido_base }} ({{ p.etiqueta_unidad_comparacion }})</p>
+          <div class="flex flex-wrap gap-2 text-xs font-bold">
+            {% if p.es_canasta_basica %}<span class="px-2 py-0.5 rounded bg-ambar-100 text-marino-900">Canasta básica</span>{% endif %}
+            {% if p.es_estrella %}<span class="px-2 py-0.5 rounded bg-coral-100 text-coral-600">Producto estrella</span>{% endif %}
+          </div>
+        </div>
+        <a href="{% url 'catalogo:editar' p.pk %}" class="btn-secundario !py-2 !px-3 text-sm shrink-0">Editar</a>
+      </article>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Recuperar contraseña — Luca{% endblock %}
+
+{% block contenido %}
+<div class="max-w-lg mx-auto tarjeta-luca space-y-4">
+  <h1 class="text-3xl">Recuperar contraseña</h1>
+  <p class="text-gris-700">Ingresa el correo con el que te registraste y te enviaremos instrucciones.</p>
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn-primario w-full">Enviar instrucciones</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static l10n %}
+{% block titulo %}Mapa y listado de comercios — Luca{% endblock %}
+
+{% block estilos_extra %}
+<link rel="stylesheet" href="{% static 'vendor/maplibre-gl/maplibre-gl.css' %}">
+{% endblock %}
+
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-3xl">Mapa de comercios de Pedro Aguirre Cerda</h1>
+      <p class="text-gris-700">Explora supermercados, almacenes, farmacias y ferias libres con MapLibre + PostGIS y vista alternativa en lista (# REQ-05, REQ-12).</p>
+    </div>
+    <div class="flex gap-2" role="group" aria-label="Modo de visualización">
+      <button type="button" id="btn-ver-mapa" class="btn-primario !py-2 !px-4 text-sm" aria-pressed="true">🗺️ Ver en mapa</button>
+      <button type="button" id="btn-ver-lista" class="btn-secundario !py-2 !px-4 text-sm" aria-pressed="false">📋 Ver como lista</button>
+    </div>
+  </div>
+
+  <form method="get" class="tarjeta-luca grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+    <div>
+      <label for="id-tipo" class="block text-sm font-bold text-marino-900 mb-1">Tipo de comercio</label>
+      <select id="id-tipo" name="tipo" class="campo-entrada">
+        <option value="">Todos los rubros</option>
+        {% for val, etiq in tipos %}
+          <option value="{{ val }}" {% if tipo_sel == val %}selected{% endif %}>{{ etiq }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="id-sector" class="block text-sm font-bold text-marino-900 mb-1">Sector / Población</label>
+      <select id="id-sector" name="sector" class="campo-entrada">
+        <option value="">Toda la comuna</option>
+        {% for val, etiq in sectores %}
+          <option value="{{ val }}" {% if sector_sel == val %}selected{% endif %}>{{ etiq }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-primario">Aplicar filtros</button>
+  </form>
+
+  <div class="flex flex-wrap items-center justify-between gap-3 bg-azul-100 rounded-xl px-4 py-3 text-sm">
+    <p id="estado-ubicacion" class="font-semibold text-marino-900">
+      Mostrando <strong>{{ sucursales|length }}</strong> locales verificados. Usaremos tu ubicación solo para mostrarte lo más cercano; nunca la guardamos.
+    </p>
+    <button type="button" id="btn-mi-ubicacion" class="btn-secundario !py-1.5 !px-3 text-sm shrink-0">📍 Cerca de mí</button>
+  </div>
+
+  {# Aviso automático cuando falta clave, no hay WebGL o falla la red (# Sección 2.1) #}
+  <div id="aviso-estado-mapa" role="status" class="hidden rounded-xl bg-ambar-100 border-2 border-ambar-500 text-marino-900 px-4 py-3 font-semibold text-sm"></div>
+
+  {# Panel mapa MapLibre GL JS #}
+  <section id="panel-mapa" class="tarjeta-luca !p-3 space-y-2">
+    <div id="mapa-luca" class="w-full h-[460px] rounded-xl z-10" aria-label="Mapa interactivo de comercios en Pedro Aguirre Cerda"></div>
+    <p class="text-xs text-gris-700 text-right">Powered by Geoapify · © OpenMapTiles · © OpenStreetMap contributors</p>
+  </section>
+
+  {# Alternativa equivalente en listado sincronizada (# REQ-05 / REQ-12) #}
+  <section id="panel-lista" class="hidden space-y-3" aria-label="Listado accesible de comercios">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {% for s in sucursales %}
+        <article class="tarjeta-luca space-y-2 transition-shadow" data-sucursal-id="{{ s.id }}" data-sucursal-lat="{{ s.latitud }}" data-sucursal-lng="{{ s.longitud }}">
+          <div class="flex items-center gap-3">
+            {% if s.comercio.url_logo_publico %}
+              <img src="{{ s.comercio.url_logo_publico }}" alt="Logo de {{ s.comercio.nombre_fantasia }}" width="44" height="44" class="w-11 h-11 rounded-xl object-contain border border-gris-200 bg-white">
+            {% else %}
+              <span class="w-11 h-11 rounded-xl inline-flex items-center justify-center text-white font-titulo font-extrabold text-sm shrink-0 {{ s.comercio.clase_color_monograma }}" aria-hidden="true">{{ s.comercio.iniciales_monograma }}</span>
+            {% endif %}
+            <div>
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-turquesa-100 text-turquesa-700">{{ s.comercio.get_tipo_display }} · {{ s.sector }}</span>
+              <h2 class="text-xl">{{ s.nombre_visible }}</h2>
+            </div>
+          </div>
+          <p class="text-sm text-gris-700">📍 {{ s.direccion }}</p>
+          <p class="text-sm text-gris-700">🕒 {{ s.horario }}</p>
+          <p class="text-sm font-bold text-turquesa-700" data-distancia-texto></p>
+          <div class="flex flex-wrap gap-2 pt-2">
+            <a href="{% url 'portal:detalle_sucursal' s.id %}" class="btn-primario !py-2 !px-4 text-sm">Ver precios</a>
+            <button type="button" data-centrar-sucursal data-lat="{{ s.latitud }}" data-lng="{{ s.longitud }}" class="btn-secundario !py-2 !px-3 text-sm">Ver en mapa</button>
+            <a href="https://www.google.com/maps/dir/?api=1&destination={{ s.latitud|unlocalize }},{{ s.longitud|unlocalize }}" target="_blank" rel="noopener noreferrer" class="btn-secundario !py-2 !px-3 text-sm">Cómo llegar en Google Maps ↗</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script type="module" src="{% static 'js/mapa.js' %}"></script>
+{% endblock %}

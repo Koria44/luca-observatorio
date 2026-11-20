@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Subir foto de {{ producto.nombre_completo }} — Luca{% endblock %}
+{% block contenido %}
+<div class="max-w-xl mx-auto tarjeta-luca space-y-5">
+  <div>
+    <h1 class="text-3xl">Agregar foto del producto</h1>
+    <p class="text-gris-700"><strong>{{ producto.nombre_completo }}</strong></p>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="space-y-4">
+    {% csrf_token %}
+    <div>
+      <label for="id-foto" class="block font-titulo font-bold text-marino-900 mb-1">Fotografía (cámara o galería · JPG, PNG, WebP · máx. 4 MB)</label>
+      <input id="id-foto" type="file" name="imagen" accept="image/*" capture="environment" required data-subir-imagen class="campo-entrada">
+      <p class="text-xs text-gris-700 mt-1">Eliminamos automáticamente los datos GPS/EXIF de la foto para proteger tu privacidad.</p>
+      <p id="aviso-imagen" aria-live="polite" class="text-sm font-semibold text-turquesa-700 mt-1"></p>
+      <img id="preview-imagen" alt="Vista previa de la foto del producto" class="hidden mt-3 max-h-56 rounded-xl border border-gris-200 bg-white object-contain mx-auto">
+    </div>
+
+    <div>
+      <label for="id-alt" class="block font-titulo font-bold text-marino-900 mb-1">Descripción corta de la foto (accesibilidad)</label>
+      <input id="id-alt" type="text" name="texto_alternativo" value="Foto de {{ producto.nombre_completo }}" maxlength="200" class="campo-entrada">
+    </div>
+
+    {% if es_staff %}
+      <label class="flex items-center gap-3 p-4 rounded-xl bg-ambar-100 border-2 border-ambar-500 font-bold text-marino-900 cursor-pointer">
+        <input type="checkbox" name="es_principal" value="1" checked class="w-6 h-6">
+        <span>Usar como imagen principal del producto (por defecto)</span>
+      </label>
+    {% else %}
+      <label class="flex items-start gap-3 p-3 rounded-xl bg-crema-50 border border-gris-200 text-sm font-semibold text-marino-900 cursor-pointer">
+        <input type="checkbox" name="declaracion_derechos" value="1" required class="w-5 h-5 mt-0.5 shrink-0">
+        <span>Declaro que tengo derecho a usar esta imagen (es mía o tengo autorización) y que muestra el producto real.</span>
+      </label>
+    {% endif %}
+
+    <div class="flex gap-3 pt-2">
+      <button type="submit" class="btn-primario flex-1">{% if es_staff %}Publicar foto{% else %}Enviar foto a revisión{% endif %}</button>
+      <a href="{% url 'portal:comparar' producto.id %}" class="btn-secundario">Volver</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block scripts_extra %}
+<script src="{% static 'js/subir-imagen.js' %}" defer></script>
+{% endblock %}

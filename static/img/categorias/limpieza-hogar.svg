@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-labelledby="t-limpieza-hogar d-limpieza-hogar">
+  <title id="t-limpieza-hogar">Categoría Limpieza del hogar</title>
+  <desc id="d-limpieza-hogar">Ilustración referencial de Luca para productos de la categoría Limpieza del hogar.</desc>
+  <rect width="240" height="240" rx="28" fill="#E5F5F5"/>
+  <circle cx="120" cy="102" r="62" fill="#FFFFFF" stroke="#0F8B8D" stroke-width="6"/>
+  <text x="120" y="122" text-anchor="middle" font-size="64">🧽</text>
+  <rect x="24" y="182" width="192" height="34" rx="17" fill="#0F8B8D"/>
+  <text x="120" y="204" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#FFFFFF">Limpieza del hogar</text>
+</svg>

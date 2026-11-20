@@ -1,0 +1,31 @@
+{
+  "type": "FeatureCollection",
+  "name": "limite_comuna_pedro_aguirre_cerda",
+  "fuente": "Polígono referencial basado en límites administrativos de Pedro Aguirre Cerda (BCN / OpenStreetMap, 2026-11-20)",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Pedro Aguirre Cerda",
+        "region": "Región Metropolitana de Santiago",
+        "cut": "13121"
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [-70.6925, -33.4755],
+              [-70.6605, -33.4755],
+              [-70.6595, -33.4955],
+              [-70.6625, -33.5075],
+              [-70.6875, -33.5075],
+              [-70.6935, -33.4910],
+              [-70.6925, -33.4755]
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block titulo %}Mis precios e historial — Luca{% endblock %}
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-3xl">Precios publicados e historial</h1>
+      <p class="text-gris-700">Cada actualización crea un registro nuevo sin borrar el historial (# REQ-06).</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'precios:registrar' %}" class="btn-primario">+ Nuevo precio</a>
+    </div>
+  </div>
+
+  <div class="space-y-3">
+    {% for p in precios %}
+      <article class="tarjeta-luca flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="space-y-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="text-lg">{{ p.producto.nombre_completo }}</h2>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold
+              {% if p.estado == 'PUBLICADO' %}bg-verde-100 text-verde-700
+              {% elif p.estado == 'PENDIENTE' %}bg-ambar-100 text-marino-900
+              {% elif p.estado == 'RECHAZADO' %}bg-rojo-100 text-rojo-600
+              {% else %}bg-gris-100 text-gris-700{% endif %}">
+              {{ p.get_estado_display }}
+            </span>
+            {% if p.alerta_variacion %}
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rojo-100 text-rojo-600">⚠ Variación {{ p.variacion_porcentual }}%</span>
+            {% endif %}
+          </div>
+          <p class="text-sm text-gris-700">{{ p.sucursal.nombre_visible }} · Obs: {{ p.fecha_observacion|date:"d/m/Y" }}</p>
+          {% if p.motivo_rechazo %}<p class="text-sm text-rojo-600 font-semibold">Motivo rechazo: {{ p.motivo_rechazo }}</p>{% endif %}
+        </div>
+        <div class="text-left sm:text-right">
+          {% if p.precio_oferta %}
+            <p class="text-sm line-through text-gris-500">${{ p.precio_normal|intcomma }}</p>
+            <p class="text-2xl font-titulo font-extrabold text-coral-600">${{ p.precio_oferta|intcomma }}</p>
+          {% else %}
+            <p class="text-2xl font-titulo font-extrabold text-marino-900">${{ p.precio_normal|intcomma }}</p>
+          {% endif %}
+          <p class="text-xs text-gris-700">${{ p.precio_por_unidad|intcomma }} / {{ p.producto.etiqueta_unidad_comparacion }}</p>
+        </div>
+      </article>
+    {% empty %}
+      <div class="tarjeta-luca text-center text-gris-700">No hay precios registrados aún.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Tu cuenta está en revisión — Luca{% endblock %}
+
+{% block contenido %}
+<div class="max-w-2xl mx-auto tarjeta-luca text-center space-y-5">
+  <img src="{% static 'img/marca/mascota-lucas-buscando.svg' %}" alt="Mascota Lucas revisando tu solicitud" class="w-32 h-auto mx-auto">
+
+  {% if usuario.estado_cuenta == "RECHAZADA" %}
+    <span class="inline-block px-4 py-1 rounded-full bg-rojo-100 text-rojo-600 font-bold">Solicitud rechazada</span>
+    <h1 class="text-3xl">Tu solicitud requiere correcciones</h1>
+    <p class="text-gris-700">El equipo municipal revisó tu registro y dejó el siguiente motivo:</p>
+    <div class="bg-rojo-100 border-2 border-rojo-600 text-rojo-600 rounded-xl p-4 font-bold text-left">
+      {{ usuario.motivo_rechazo|default:"Sin motivo especificado." }}
+    </div>
+  {% elif usuario.estado_cuenta == "VERIFICADA" %}
+    <span class="inline-block px-4 py-1 rounded-full bg-turquesa-100 text-turquesa-700 font-bold">Paso 2 de 3 · Verificada por fiscalizador</span>
+    <h1 class="text-3xl">¡Tus datos ya fueron verificados!</h1>
+    <p class="text-gris-700">Solo falta la aprobación final de administración DIDESE para activar tu acceso y publicar precios.</p>
+  {% else %}
+    <span class="inline-block px-4 py-1 rounded-full bg-ambar-100 text-marino-900 font-bold">Paso 1 de 3 · Pendiente de revisión</span>
+    <h1 class="text-3xl">Tu cuenta está en revisión</h1>
+    <p class="text-gris-700">
+      Recibimos tu solicitud correctamente. Mientras no sea aprobada, no podrás publicar precios ni editar sucursales.
+    </p>
+  {% endif %}
+
+  <ol class="text-left bg-crema-50 rounded-xl p-4 border border-gris-200 space-y-2 text-base">
+    <li><strong>1. Registro recibido:</strong> ✔ Completado ({{ usuario.creado_en|date:"d/m/Y H:i" }})</li>
+    <li><strong>2. Verificación municipal (fiscalizador):</strong> {% if usuario.fecha_verificacion %}✔ Verificada{% else %}⏳ En espera{% endif %}</li>
+    <li><strong>3. Aprobación final (DIDESE):</strong> {% if usuario.estado_cuenta == "ACTIVA" %}✔ Activa{% else %}⏳ Pendiente{% endif %}</li>
+  </ol>
+
+  <p class="text-sm text-gris-700">¿Tienes dudas? Escribe a DIDESE Pedro Aguirre Cerda desde el portal ciudadano.</p>
+  <div class="flex flex-wrap justify-center gap-3">
+    <a href="{% url 'portal:inicio' %}" class="btn-secundario">Volver al inicio</a>
+    <form method="post" action="{% url 'cuentas:salir' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-primario">Cerrar sesión</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

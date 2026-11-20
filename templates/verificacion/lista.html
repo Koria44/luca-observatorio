@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}Verificación de los 16 requerimientos — Luca{% endblock %}
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-3xl">Lista de verificación de los 16 requerimientos</h1>
+      <p class="text-gris-700">Solo se marca <strong>CUMPLIDO</strong> cuando existe evidencia verificable (pruebas, capturas o reportes).</p>
+    </div>
+    <span class="px-4 py-2 rounded-xl bg-marino-700 text-white font-titulo font-extrabold">{{ cumplidos }} / {{ total }} cumplidos</span>
+  </div>
+
+  <div class="space-y-3">
+    {% for it in items %}
+      <article class="tarjeta-luca space-y-2">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 class="text-lg">REQ-{{ it.numero|stringformat:"02d" }} · {{ it.titulo }}</h2>
+          <span class="px-3 py-0.5 rounded-full text-xs font-bold {% if it.estado == 'CUMPLIDO' %}bg-verde-100 text-verde-700{% else %}bg-ambar-100 text-marino-900{% endif %}">
+            {{ it.get_estado_display }}
+          </span>
+        </div>
+        {% if it.evidencia %}<p class="text-sm text-gris-700"><strong>Evidencia:</strong> {{ it.evidencia }}</p>{% endif %}
+        {% if it.comentario %}<p class="text-xs text-gris-700">{{ it.comentario }}</p>{% endif %}
+      </article>
+    {% empty %}
+      <div class="tarjeta-luca text-center text-gris-700">Ejecuta <code>python tools/evidencia/generar_matriz.py</code> para poblar y sincronizar los 16 requerimientos.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

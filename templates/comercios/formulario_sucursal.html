@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Editar sucursal — Luca{% endblock %}
+
+{% block estilos_extra %}
+<link rel="stylesheet" href="{% static 'vendor/maplibre-gl/maplibre-gl.css' %}">
+{% endblock %}
+
+{% block contenido %}
+<div class="max-w-3xl mx-auto tarjeta-luca space-y-6">
+  <div class="space-y-1">
+    <h1 class="text-3xl">Ubicación y datos de sucursal: {{ sucursal.nombre }}</h1>
+    <p class="text-gris-700 text-sm">Escribe la calle y el número (ej. <em>Av. Departamental 3800</em>) o una referencia <em>S/N</em>, y afina el pin hasta la entrada del local.</p>
+  </div>
+
+  <form method="post" class="space-y-5">
+    {% csrf_token %}
+    {{ form.direccion_normalizada }}
+    {{ form.origen_coordenada }}
+
+    {% include "componentes/campo.html" with field=form.nombre %}
+
+    {# Combobox ARIA accesible de dirección (# REQ-02, REQ-12 / Prompt 5 Sección 2.3) #}
+    <div class="space-y-1.5 relative">
+      <label for="{{ form.direccion.id_for_label }}" class="block font-titulo font-bold text-marino-900">
+        Dirección del local <span class="text-rojo-600">*</span>
+      </label>
+      {{ form.direccion }}
+      <p class="text-sm text-gris-700">Escriba la calle y el número (o "S/N" y referencia para ferias o kioscos).</p>
+      <p id="anuncio-direccion-aria" class="sr-only" aria-live="polite"></p>
+      <ul id="lista-sugerencias-direccion" role="listbox" aria-label="Sugerencias de dirección" class="hidden absolute z-30 left-0 right-0 bg-white border-2 border-marino-700 rounded-xl shadow-lg max-h-60 overflow-y-auto"></ul>
+    </div>
+
+    <div id="aviso-precision-ubicacion" role="status" class="hidden rounded-xl bg-ambar-100 border-2 border-ambar-500 p-3 text-sm font-bold text-marino-900"></div>
+
+    <div id="confirmar-direccion-inversa" class="hidden rounded-xl bg-azul-100 border-2 border-azul-600 p-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+      <span>¿Usar esta dirección sugerida? <strong id="texto-direccion-inversa"></strong></span>
+      <button type="button" id="btn-aceptar-inversa" class="btn-primario !py-1.5 !px-3 text-xs">Sí, usar dirección</button>
+    </div>
+
+    {# Mapa pequeño arrastrable + controles teclado N/S/E/O (# Sección 2.4) #}
+    <div class="space-y-3 rounded-2xl border border-gris-200 bg-crema-50 p-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <p class="font-titulo font-bold text-marino-900">Arrastra el pin hasta la puerta de tu local</p>
+        <button type="button" id="btn-usar-gps-actual" class="btn-secundario !py-1.5 !px-3 text-xs">📍 Usar mi ubicación actual</button>
+      </div>
+      <div id="mapa-selector-sucursal" class="w-full h-64 rounded-xl border border-gris-200" aria-label="Selector de ubicación en mapa"></div>
+      <div class="flex flex-wrap items-center gap-2 text-xs" role="group" aria-label="Ajustar pin con teclado">
+        <span class="font-bold text-marino-900">Ajuste preciso (teclado):</span>
+        <button type="button" data-mover-pin="norte" class="btn-secundario !py-1 !px-3 text-xs">↑ Norte</button>
+        <button type="button" data-mover-pin="sur" class="btn-secundario !py-1 !px-3 text-xs">↓ Sur</button>
+        <button type="button" data-mover-pin="oeste" class="btn-secundario !py-1 !px-3 text-xs">← Oeste</button>
+        <button type="button" data-mover-pin="este" class="btn-secundario !py-1 !px-3 text-xs">→ Este</button>
+      </div>
+      <details class="text-sm">
+        <summary class="font-bold text-marino-900 cursor-pointer">Coordenadas avanzadas (latitud / longitud)</summary>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+          {% include "componentes/campo.html" with field=form.latitud %}
+          {% include "componentes/campo.html" with field=form.longitud %}
+        </div>
+      </details>
+    </div>
+
+    {% include "componentes/campo.html" with field=form.sector %}
+    {% include "componentes/campo.html" with field=form.horario %}
+    {% include "componentes/campo.html" with field=form.telefono %}
+    <label class="inline-flex items-center gap-2 font-bold text-marino-900">
+      {{ form.requiere_ajuste }} Marcar para revisión de pin en terreno
+    </label>
+    <label class="inline-flex items-center gap-2 font-bold text-marino-900 ml-4">
+      {{ form.activa }} Sucursal activa
+    </label>
+
+    <div class="flex flex-wrap gap-3 pt-2">
+      <button type="submit" class="btn-primario">Guardar ubicación</button>
+      <a href="{% url 'comercios:mis_sucursales' %}" class="btn-secundario">Volver</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script type="module" src="{% static 'js/buscador-direccion.js' %}"></script>
+{% endblock %}

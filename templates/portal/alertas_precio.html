@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load humanize static %}
+{% block titulo %}Alertas de baja de precio — Luca{% endblock %}
+
+{% block contenido %}
+<div class="max-w-3xl mx-auto space-y-6">
+  <div class="space-y-1">
+    <span class="cinta-luca">Avisos automáticos por correo</span>
+    <h1 class="text-3xl sm:text-4xl">Mis alertas de baja de precio</h1>
+    <p class="text-pizarra-600">Te enviaremos un correo apenas algún comercio de Pedro Aguirre Cerda publique un precio igual o menor al que elijas.</p>
+  </div>
+
+  <form method="post" class="tarjeta-luca grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {% csrf_token %}
+    <div class="sm:col-span-2">
+      <label for="alerta-prod" class="block font-bold text-tinta-900 mb-1">Producto</label>
+      <select id="alerta-prod" name="producto_id" required class="campo-entrada">
+        {% for p in productos %}
+          <option value="{{ p.id }}" {% if producto_preseleccionado == p.id %}selected{% endif %}>{{ p.nombre_completo }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="alerta-monto" class="block font-bold text-tinta-900 mb-1">Avisar si baja de (CLP)</label>
+      <input id="alerta-monto" type="number" name="precio_objetivo" min="100" required placeholder="Ej: 1490" class="campo-entrada">
+    </div>
+    <div>
+      <label for="alerta-sector" class="block font-bold text-tinta-900 mb-1">Sector preferido (opcional)</label>
+      <select id="alerta-sector" name="sector" class="campo-entrada">
+        <option value="">Toda la comuna</option>
+        {% for v, e in sectores %}<option value="{{ v }}">{{ e }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="sm:col-span-2">
+      <button type="submit" class="btn-primario w-full">Crear alerta de precio</button>
+    </div>
+  </form>
+
+  <section class="space-y-3">
+    <h2 class="text-2xl">Tus alertas activas ({{ alertas|length }})</h2>
+    {% for a in alertas %}
+      <article class="tarjeta-luca flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 class="text-lg">{{ a.producto.nombre_completo }}</h3>
+          <p class="text-sm text-pizarra-600">
+            Avisar si baja de <strong class="text-ahorro-700 precio-destacado">${{ a.precio_objetivo|intcomma }}</strong>
+            {% if a.sector %}· Sector {{ a.sector }}{% else %}· Toda la comuna{% endif %}
+          </p>
+          {% if a.ultima_notificacion %}
+            <p class="text-xs text-ahorro-700 font-bold mt-1">✔ Último aviso enviado el {{ a.ultima_notificacion|date:"d/m/Y H:i" }}</p>
+          {% endif %}
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="accion" value="eliminar">
+          <input type="hidden" name="alerta_id" value="{{ a.id }}">
+          <button type="submit" class="btn-secundario !py-1.5 !px-4 text-sm !text-tomate-600 !border-tomate-600/40 hover:!bg-tomate-100">Eliminar</button>
+        </form>
+      </article>
+    {% empty %}
+      <div class="tarjeta-luca text-center space-y-2.5 py-8">
+        <img src="{% static 'img/marca/mascota-lucas-buscando.svg' %}" alt="Lucas atento a las bajas de precio" class="w-24 mx-auto">
+        <p class="font-bold text-tinta-900">Aún no tienes alertas creadas</p>
+        <p class="text-sm text-pizarra-600">Crea tu primera alerta arriba y Lucas te avisará apenas baje el precio.</p>
+      </div>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

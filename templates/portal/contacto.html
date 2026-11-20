@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Contacto — Luca{% endblock %}
+{% block contenido %}
+<div class="max-w-2xl mx-auto tarjeta-luca space-y-4">
+  <h1 class="text-3xl">Contacto y orientación</h1>
+  <p class="text-gris-700">
+    Este portal corresponde al prototipo académico del <strong>Observatorio de Precios del Comercio Local (Pedro Aguirre Cerda)</strong>, diseñado para la Dirección de Desarrollo Económico y Social (DIDESE).
+  </p>
+  <ul class="space-y-2 text-gris-700">
+    <li><strong>Atención de consultas académicas:</strong> equipo-luca@pac-academico.local</li>
+    <li><strong>Transparencia:</strong> <a href="{% url 'portal:transparencia' %}" class="underline font-bold text-marino-700">Ver metodología de datos</a></li>
+    <li><strong>Privacidad:</strong> <a href="{% url 'portal:privacidad' %}" class="underline font-bold text-marino-700">Ver aviso de privacidad</a></li>
+  </ul>
+</div>
+{% endblock %}

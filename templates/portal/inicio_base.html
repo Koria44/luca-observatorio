@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Inicio — Luca · Observatorio de Precios (Pedro Aguirre Cerda){% endblock %}
+
+{% block contenido %}
+<section class="tarjeta-luca grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+  <div class="md:col-span-8 space-y-4">
+    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-turquesa-100 text-turquesa-700 font-bold text-sm">
+      Observatorio Comunal · Pedro Aguirre Cerda
+    </span>
+    <h1 class="text-3xl sm:text-4xl leading-tight">
+      Cada luca cuenta: compara precios del comercio local
+    </h1>
+    <p class="text-gris-700 text-lg">
+      Base de la plataforma <strong>Luca</strong> lista en Fase 0. Diseño pensado para vecinos, adultos mayores, comerciantes y fiscalizadores de Pedro Aguirre Cerda.
+    </p>
+    <div class="flex flex-wrap gap-3 pt-2">
+      <a href="{% static 'img/marca/guia-de-marca.html' %}" class="btn-primario">
+        Ver guía de marca
+      </a>
+      <a href="{% url 'salud' %}" class="btn-secundario">
+        Verificar estado del sistema
+      </a>
+    </div>
+  </div>
+  <div class="md:col-span-4 flex justify-center">
+    <img src="{% static 'img/marca/mascota-lucas-saludando.svg' %}" alt="Mascota Lucas saludando a los vecinos" class="w-40 sm:w-48 h-auto">
+  </div>
+</section>
+{% endblock %}

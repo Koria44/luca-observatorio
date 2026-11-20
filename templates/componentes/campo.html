@@ -1,0 +1,29 @@
+{# Componente accesible para renderizar un campo de formulario (# REQ-12) #}
+<div class="space-y-1.5">
+  <label for="{{ field.id_for_label }}" class="block font-titulo font-bold text-marino-900">
+    {{ field.label }}{% if field.field.required %} <span class="text-rojo-600" aria-hidden="true">*</span>{% endif %}
+  </label>
+  {% if field.field.widget.input_type == "password" %}
+    <div class="flex gap-2">
+      <div class="flex-1">{{ field }}</div>
+      <button
+        type="button"
+        data-toggle-password="{{ field.id_for_label }}"
+        aria-pressed="false"
+        class="btn-secundario !px-4 shrink-0 text-sm"
+      >Mostrar</button>
+    </div>
+  {% else %}
+    {{ field }}
+  {% endif %}
+  {% if field.help_text %}
+    <p class="text-sm text-gris-700">{{ field.help_text }}</p>
+  {% endif %}
+  {% if field.errors %}
+    <div role="alert" class="text-sm font-bold text-rojo-600 bg-rojo-100 rounded-lg px-3 py-1.5">
+      {% for error in field.errors %}
+        <p>✘ {{ error }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

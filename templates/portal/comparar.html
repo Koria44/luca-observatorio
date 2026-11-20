@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load humanize static %}
+{% block titulo %}{{ producto.nombre_completo }} — Comparador Luca{% endblock %}
+
+{% block contenido %}
+<div class="space-y-8">
+  <nav aria-label="Ruta de navegación" class="text-sm font-bold text-pizarra-600">
+    <a href="{% url 'portal:inicio' %}" class="underline hover:text-tinta-900">Inicio</a> /
+    <a href="{% url 'portal:buscar' %}?categoria={{ producto.categoria.slug }}" class="underline hover:text-tinta-900">{{ producto.categoria.nombre }}</a> /
+    <span class="text-tinta-900">{{ producto.nombre_completo }}</span>
+  </nav>
+
+  {# Encabezado del producto con ganador destacado (# Sección 3.4) #}
+  {% with img=producto.imagen_por_defecto %}
+  <section class="tarjeta-luca flex flex-col md:flex-row md:items-center justify-between gap-5">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <img src="{{ img.url_media }}" alt="{{ img.alt }}" width="120" height="120"
+        class="w-28 h-28 rounded-2xl object-contain bg-crema-50 border border-crema-200 p-2 shrink-0">
+      <div class="space-y-1.5">
+        <span class="px-3 py-0.5 rounded-full bg-tinte-cielo text-tinta-900 text-xs font-bold">{{ producto.categoria.icono }} {{ producto.categoria.nombre }}</span>
+        <h1 class="text-3xl">{{ producto.nombre_completo }}</h1>
+        <p class="text-pizarra-600">Formato: {{ producto.formato }} ({{ producto.contenido_legible }}) · Unidad de comparación: <strong class="text-tinta-900">$/{{ producto.etiqueta_unidad_comparacion }}</strong></p>
+        <p class="text-xs text-pizarra-600">
+          Imagen: {{ img.origen }}{% if img.atribucion %} · {{ img.atribucion }} ({{ img.licencia }}){% endif %}
+          {% if user.is_authenticated and user.rol != "VECINO" %}
+          · <a href="{% url 'catalogo:subir_foto' producto.id %}" class="underline font-bold text-tinta-900">Agregar foto</a>
+          {% endif %}
+        </p>
+        <div class="flex flex-wrap gap-2 pt-1">
+          {% if user.is_authenticated and user.rol == "VECINO" %}
+          <button type="button" data-agregar-canasta data-producto-id="{{ producto.id }}"
+            data-producto-nombre="{{ producto.nombre_completo }}" class="btn-acento !py-2 !px-4 text-sm">+ Agregar a mi lista</button>
+          {% endif %}
+          {% if mejor_precio %}
+          <a href="https://wa.me/?text=En%20Luca%20PAC%20{{ producto.nombre_completo|urlencode }}%20est%C3%A1%20a%20%24{{ mejor_precio.precio_vigente }}%20en%20{{ mejor_precio.sucursal.nombre_visible|urlencode }}"
+            target="_blank" rel="noopener noreferrer"
+            class="btn-secundario !py-2 !px-4 text-sm !border-ahorro-600 !text-ahorro-700">Compartir por WhatsApp</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% if mejor_precio %}
+    <div class="rounded-tarjeta bg-tinte-menta border-2 border-ahorro-600 p-5 text-left md:text-right shrink-0 space-y-1 shadow-luca-suave">
+      <span class="cinta-mejor-precio">★ Mejor precio hoy</span>
+      <p class="text-4xl precio-destacado text-ahorro-700 pt-1">${{ mejor_precio.precio_vigente|intcomma }}</p>
+      <p class="text-sm font-bold text-tinta-900">${{ mejor_precio.precio_por_unidad|intcomma }} / {{ producto.etiqueta_unidad_comparacion }}</p>
+      <p class="text-xs font-semibold text-pizarra-600">{{ mejor_precio.sucursal.nombre_visible }}</p>
+    </div>
+    {% endif %}
+  </section>
+  {% endwith %}
+
+  {# Otros formatos del mismo producto (# REQ-01, REQ-04) #}
+  {% if otros_formatos %}
+  <div class="flex flex-wrap items-center gap-2 text-sm">
+    <span class="font-bold text-tinta-900">Otros formatos o marcas:</span>
+    {% for of in otros_formatos %}
+    <a href="{% url 'portal:comparar' of.id %}"
+      class="px-3.5 py-1.5 rounded-full bg-white border border-crema-200 hover:border-ahorro-600 hover:bg-ahorro-100/50 font-bold text-tinta-900 transition-colors">{{ of.marca.nombre }} {{ of.contenido_legible }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Comparador por comercio (# REQ-04, REQ-13) #}
+  <section class="space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <h2 class="text-2xl">Precios en comercios de Pedro Aguirre Cerda ({{ precios_vigentes|length }})</h2>
+      <div class="flex flex-wrap gap-2 text-sm">
+        <a href="?orden=precio"
+          class="chip-filtro !py-1.5 {% if orden == 'precio' %}bg-tinta-900 text-white border-tinta-900{% else %}bg-white border-crema-200 text-tinta-900 hover:border-tinta-900{% endif %}">Menor precio</a>
+        <a href="?orden=unidad"
+          class="chip-filtro !py-1.5 {% if orden == 'unidad' %}bg-tinta-900 text-white border-tinta-900{% else %}bg-white border-crema-200 text-tinta-900 hover:border-tinta-900{% endif %}">Precio / {{ producto.etiqueta_unidad_comparacion }}</a>
+        <a href="?orden=fecha"
+          class="chip-filtro !py-1.5 {% if orden == 'fecha' %}bg-tinta-900 text-white border-tinta-900{% else %}bg-white border-crema-200 text-tinta-900 hover:border-tinta-900{% endif %}">Más reciente</a>
+      </div>
+    </div>
+
+    <div class="space-y-3.5">
+      {% for p in precios_vigentes %}
+      <article class="tarjeta-luca {% if forloop.first %}border-2 border-ahorro-600 bg-gradient-to-r from-white to-tinte-menta/40{% endif %} space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="space-y-1.5">
+            <div class="flex flex-wrap items-center gap-2">
+              {% if forloop.first %}<span class="cinta-mejor-precio">★ Más económico</span>{% endif %}
+              {% if p.es_oferta_activa %}<span class="cinta-oferta">Oferta −{{ p.porcentaje_descuento }}%</span>{% endif %}
+              {% if p.es_demo %}<span class="px-2.5 py-0.5 rounded-full bg-crema-100 text-pizarra-600 text-xs font-bold">Dato de demostración</span>{% endif %}
+            </div>
+            <h3 class="text-xl"><a href="{% url 'portal:detalle_sucursal' p.sucursal.id %}" class="hover:text-ahorro-600 transition-colors">{{ p.sucursal.nombre_visible }}</a></h3>
+            <p class="text-sm text-pizarra-600">{{ p.sucursal.direccion }} · <strong class="text-tinta-900">{{ p.sucursal.sector }}</strong>{% if p.distancia_texto %} · <span class="text-ahorro-700 font-bold">{{ p.distancia_texto }}</span>{% endif %}</p>
+
+            {# Etiquetas de condiciones y stock (# REQ-04, REQ-13) #}
+            <div class="flex flex-wrap gap-2 pt-1">
+              {% for et in p.etiquetas_condiciones %}
+              <span class="px-2.5 py-0.5 rounded-full bg-luca-100 text-tinta-900 text-xs font-bold">⚠ {{ et }}</span>
+              {% endfor %}
+              {% if not p.stock_confirmado %}
+              <span class="px-2.5 py-0.5 rounded-full bg-crema-100 text-pizarra-600 text-xs font-semibold">ℹ Disponibilidad no confirmada en local</span>
+              {% else %}
+              <span class="px-2.5 py-0.5 rounded-full bg-ahorro-100 text-ahorro-700 text-xs font-semibold">✔ Disponibilidad informada</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="text-left sm:text-right shrink-0">
+            {% if p.es_oferta_activa %}
+            <p class="text-sm line-through text-pizarra-500 tabular-nums">${{ p.precio_normal|intcomma }}</p>
+            <p class="text-3xl precio-destacado text-tomate-600">${{ p.precio_oferta|intcomma }}</p>
+            {% else %}
+            <p class="text-3xl precio-destacado {% if forloop.first %}text-ahorro-600{% else %}text-tinta-900{% endif %}">${{ p.precio_normal|intcomma }}</p>
+            {% endif %}
+            <p class="text-sm font-bold text-ahorro-700">${{ p.precio_por_unidad|intcomma }} / {{ producto.etiqueta_unidad_comparacion }}</p>
+          </div>
+        </div>
+
+        {# Transparencia desplegable del dato (# REQ-13) + Reporte ciudadano en sala #}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          <details class="text-sm bg-crema-50 rounded-2xl px-4 py-2.5 border border-crema-200">
+            <summary class="font-bold text-tinta-900 cursor-pointer">Ver detalle del dato (fuente, fecha y vigencia)</summary>
+            <ul class="mt-2 space-y-1 text-pizarra-600">
+              <li><strong>Fuente:</strong> {{ p.get_fuente_display }} {% if p.fuente_detalle %}— {{ p.fuente_detalle }}{% endif %}</li>
+              <li><strong>Fecha de observación:</strong> {{ p.fecha_observacion|date:"d/m/Y" }}</li>
+              <li><strong>Vigencia:</strong> desde {{ p.vigencia_desde|date:"d/m/Y" }}{% if p.vigencia_hasta %} hasta {{ p.vigencia_hasta|date:"d/m/Y" }}{% else %} (sin fecha de término){% endif %}</li>
+              <li><strong>Sucursal:</strong> {{ p.sucursal.direccion }} ({{ p.sucursal.horario }})</li>
+            </ul>
+          </details>
+
+          {% if user.is_authenticated and user.rol == "VECINO" %}
+          <details class="text-sm bg-tomate-100/50 rounded-2xl px-4 py-2.5 border border-tomate-600/20">
+            <summary class="font-bold text-tomate-600 cursor-pointer">⚠ Reportar precio distinto en sala</summary>
+            <form method="post" action="{% url 'portal:reportar_precio' p.id %}" class="mt-2 space-y-2">
+              {% csrf_token %}
+              <select name="motivo" aria-label="Motivo del reporte" class="campo-entrada !py-1.5 text-xs">
+                <option value="PRECIO_DISTINTO">El precio en el local es distinto</option>
+                <option value="SIN_STOCK">Producto agotado / sin stock</option>
+                <option value="OFERTA_TERMINADA">La oferta ya no estaba vigente</option>
+              </select>
+              <input type="text" name="comentario" maxlength="200" placeholder="Ej: Hoy costaba $1.890 en caja"
+                aria-label="Comentario del reporte" class="campo-entrada !py-1.5 text-xs">
+              <button type="submit" class="btn-tomate !py-1.5 !px-3.5 text-xs">Enviar reporte al fiscalizador</button>
+            </form>
+          </details>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# Historial de precios Chart.js + Tabla alternativa accesible (# REQ-06, REQ-12) #}
+  <section class="tarjeta-luca space-y-4">
+    <div>
+      <h2 class="text-2xl">Evolución histórica del precio</h2>
+      <p class="text-sm text-pizarra-600">Precio promedio y mínimo registrado en las últimas semanas (CLP por {{ producto.contenido_legible }}).</p>
+    </div>
+    <canvas data-grafico-historial="{{ serie_historial_json }}"
+      aria-label="Gráfico de evolución histórica del precio de {{ producto.nombre_completo }}"
+      class="w-full max-h-80"></canvas>
+
+    <details class="pt-2">
+      <summary class="font-bold text-tinta-900 cursor-pointer">Ver datos del gráfico en tabla accesible</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="border-b-2 border-tinta-900 text-tinta-900">
+              <th class="py-2 pr-4">Fecha</th>
+              <th class="py-2 pr-4">Precio promedio (CLP)</th>
+              <th class="py-2 pr-4">Precio mínimo (CLP)</th>
+              <th class="py-2">Observaciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for punto in serie_historial %}
+            <tr class="border-b border-crema-200">
+              <td class="py-2 pr-4">{{ punto.fecha }}</td>
+              <td class="py-2 pr-4 font-bold tabular-nums">${{ punto.promedio|intcomma }}</td>
+              <td class="py-2 pr-4 text-ahorro-700 font-bold tabular-nums">${{ punto.minimo|intcomma }}</td>
+              <td class="py-2">{{ punto.muestras }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+<script src="{% static 'js/graficos.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% load humanize static %}
+{% block titulo %}Dashboard DIDESE — Luca{% endblock %}
+
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div class="space-y-1">
+      <span class="cinta-luca">Administración DIDESE · Pedro Aguirre Cerda</span>
+      <h1 class="text-3xl sm:text-4xl">Indicadores del Observatorio de Precios</h1>
+      <p class="text-sm text-pizarra-600">
+        Período: <strong class="text-tinta-900">{{ datos.filtros_legibles.periodo }}</strong> · Categoría: <strong class="text-tinta-900">{{ datos.filtros_legibles.categoria }}</strong> · Sector: <strong class="text-tinta-900">{{ datos.filtros_legibles.sector }}</strong>
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a href="/reportes/excel/?dias={{ filtros.dias }}&categoria={{ filtros.categoria }}&sector={{ filtros.sector }}&comercio={{ filtros.comercio }}" class="btn-tinta !py-2 !px-4 text-sm">⬇ Exportar Excel</a>
+      <a href="/reportes/pdf/?dias={{ filtros.dias }}&categoria={{ filtros.categoria }}&sector={{ filtros.sector }}&comercio={{ filtros.comercio }}" class="btn-acento !py-2 !px-4 text-sm">⬇ Exportar PDF</a>
+      <a href="{% url 'reportes:boletin_semanal' %}" class="btn-secundario !py-2 !px-4 text-sm">Boletín Semanal PDF</a>
+      <a href="{% url 'panel:cobertura_didese' %}" class="btn-secundario !py-2 !px-4 text-sm">Cobertura y desiertos</a>
+    </div>
+  </div>
+
+  {# Filtros globales (# REQ-07) #}
+  <form method="get" class="tarjeta-luca grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+    <div>
+      <label for="f-dias" class="block text-sm font-bold text-tinta-900 mb-1">Período</label>
+      <select id="f-dias" name="dias" class="campo-entrada">
+        <option value="7" {% if filtros.dias == "7" %}selected{% endif %}>Últimos 7 días</option>
+        <option value="30" {% if filtros.dias == "30" %}selected{% endif %}>Últimos 30 días</option>
+        <option value="90" {% if filtros.dias == "90" %}selected{% endif %}>Últimos 90 días</option>
+      </select>
+    </div>
+    <div>
+      <label for="f-cat" class="block text-sm font-bold text-tinta-900 mb-1">Categoría</label>
+      <select id="f-cat" name="categoria" class="campo-entrada">
+        <option value="">Todas</option>
+        {% for c in categorias %}
+          <option value="{{ c.slug }}" {% if filtros.categoria == c.slug %}selected{% endif %}>{{ c.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="f-sector" class="block text-sm font-bold text-tinta-900 mb-1">Sector</label>
+      <select id="f-sector" name="sector" class="campo-entrada">
+        <option value="">Toda la comuna</option>
+        {% for v, e in sectores %}
+          <option value="{{ v }}" {% if filtros.sector == v %}selected{% endif %}>{{ e }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="f-com" class="block text-sm font-bold text-tinta-900 mb-1">Comercio</label>
+      <select id="f-com" name="comercio" class="campo-entrada">
+        <option value="">Todos</option>
+        {% for co in comercios %}
+          <option value="{{ co.id }}" {% if filtros.comercio == co.id|stringformat:"s" %}selected{% endif %}>{{ co.nombre_fantasia }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-primario">Aplicar filtros</button>
+  </form>
+
+  {# Tarjetas KPI estilo Bento con tintes semánticos (# REQ-07) #}
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
+    <div class="lg:col-span-4 rounded-tarjeta bg-tinte-menta border border-ahorro-600/20 shadow-luca p-5 sm:p-6 space-y-1">
+      <p class="text-xs font-bold uppercase tracking-wide text-ahorro-700">Canasta básica ({{ datos.kpis.canasta_items }} ítems)</p>
+      <p class="text-4xl precio-destacado text-tinta-900">${{ datos.kpis.canasta_prom|intcomma }}</p>
+      <p class="text-xs text-pizarra-600">Mín: <strong class="text-tinta-900">${{ datos.kpis.canasta_min|intcomma }}</strong> · Máx: <strong class="text-tinta-900">${{ datos.kpis.canasta_max|intcomma }}</strong></p>
+    </div>
+    <div class="lg:col-span-3 rounded-tarjeta bg-tinte-cielo border border-tinta-900/10 shadow-luca p-5 space-y-1">
+      <p class="text-xs font-bold uppercase tracking-wide text-tinta-700">Precio promedio</p>
+      <p class="text-3xl precio-destacado text-tinta-900">${{ datos.kpis.precio_promedio|intcomma }}</p>
+      <p class="text-xs text-pizarra-600">Mín: ${{ datos.kpis.precio_minimo|intcomma }} · Máx: ${{ datos.kpis.precio_maximo|intcomma }}</p>
+    </div>
+    <div class="lg:col-span-2 rounded-tarjeta bg-tinte-durazno border border-tomate-600/20 shadow-luca p-5 space-y-1">
+      <p class="text-xs font-bold uppercase tracking-wide text-tomate-600">Ofertas activas</p>
+      <p class="text-3xl precio-destacado text-tomate-600">{{ datos.kpis.ofertas_vigentes }}</p>
+      <p class="text-xs text-pizarra-600">{{ datos.kpis.productos_monitoreados }} productos</p>
+    </div>
+    <div class="lg:col-span-3 rounded-tarjeta bg-tinte-mantequilla border border-luca-400/50 shadow-luca p-5 space-y-1">
+      <p class="text-xs font-bold uppercase tracking-wide text-tinta-900">Cobertura comunal PAC</p>
+      <p class="text-3xl precio-destacado text-ahorro-700">{{ datos.kpis.cobertura_sectores_pct }}%</p>
+      <p class="text-xs text-pizarra-600">{{ datos.kpis.comercios_activos }} locales · Antig. prom. {{ datos.kpis.antiguedad_promedio_dias }} d</p>
+    </div>
+  </section>
+
+  {# Gráficos Chart.js con tabla alternativa accesible (# REQ-07, REQ-12) #}
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="tarjeta-luca space-y-3">
+      <h2 class="text-xl">Precio promedio por categoría (CLP)</h2>
+      <canvas data-grafico-barras="{{ serie_categorias_json }}" data-titulo-serie="Precio promedio (CLP)" data-es-moneda="1" aria-label="Gráfico de precio promedio por categoría"></canvas>
+      <details class="text-sm pt-2">
+        <summary class="font-bold text-tinta-900 cursor-pointer">Ver datos en tabla</summary>
+        <table class="w-full text-left mt-2 border-collapse">
+          <thead><tr class="border-b-2 border-tinta-900"><th class="py-1">Categoría</th><th class="py-1">Promedio</th><th class="py-1">Mín</th><th class="py-1">Máx</th></tr></thead>
+          <tbody>
+            {% for c in datos.por_categoria %}
+              <tr class="border-b border-crema-200"><td class="py-1">{{ c.etiqueta }}</td><td class="py-1 font-bold tabular-nums">${{ c.promedio|intcomma }}</td><td class="py-1 tabular-nums">${{ c.minimo|intcomma }}</td><td class="py-1 tabular-nums">${{ c.maximo|intcomma }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </details>
+    </div>
+
+    <div class="tarjeta-luca space-y-3">
+      <h2 class="text-xl">Comercios con menor precio promedio (CLP)</h2>
+      <canvas data-grafico-barras="{{ serie_comercios_json }}" data-titulo-serie="Promedio observado (CLP)" data-es-moneda="1" aria-label="Gráfico de precio promedio por comercio"></canvas>
+      <details class="text-sm pt-2">
+        <summary class="font-bold text-tinta-900 cursor-pointer">Ver datos en tabla</summary>
+        <table class="w-full text-left mt-2 border-collapse">
+          <thead><tr class="border-b-2 border-tinta-900"><th class="py-1">Comercio</th><th class="py-1">Promedio</th><th class="py-1">Precios</th></tr></thead>
+          <tbody>
+            {% for co in datos.por_comercio %}
+              <tr class="border-b border-crema-200"><td class="py-1">{{ co.etiqueta }}</td><td class="py-1 font-bold tabular-nums">${{ co.valor|intcomma }}</td><td class="py-1">{{ co.cantidad }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </details>
+    </div>
+  </section>
+
+  {# Accesos de gestión y alertas con borde lateral suave #}
+  <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-5 tarjeta-luca space-y-3">
+      <h2 class="text-xl">Gestión rápida DIDESE</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-sm">
+        <a href="{% url 'cuentas:cola_revision' %}" class="btn-secundario !py-2 text-center">Comercios ({{ datos.tablas_trabajo.cuentas_pendientes }})</a>
+        <a href="{% url 'precios:cola_revision' %}" class="btn-secundario !py-2 text-center">Precios ({{ datos.tablas_trabajo.precios_pendientes }})</a>
+        <a href="{% url 'catalogo:lista' %}" class="btn-secundario !py-2 text-center">Catálogo maestro</a>
+        <a href="{% url 'auditoria:lista' %}" class="btn-secundario !py-2 text-center">Auditoría</a>
+        <a href="/precios/carga-masiva/" class="btn-secundario !py-2 text-center">Carga masiva</a>
+      </div>
+      <div class="rounded-2xl bg-tinte-cielo px-4 py-2.5 text-xs text-tinta-900">
+        <strong>Consumo API Mapas hoy:</strong> {{ datos.consumo_mapas.usado }} / {{ datos.consumo_mapas.tope }} consultas ({{ datos.consumo_mapas.porcentaje }}%)
+      </div>
+    </div>
+
+    <div class="lg:col-span-7 tarjeta-luca space-y-3">
+      <h2 class="text-xl text-tomate-600">Alertas de variación atípica (&gt; ±40 %)</h2>
+      {% for a in datos.tablas_trabajo.alertas_atipicas %}
+        <div class="rounded-2xl bg-crema-50 border-l-4 border-tomate-600 p-3.5 flex flex-wrap justify-between items-center gap-2 text-sm">
+          <div>
+            <strong class="text-tinta-900">{{ a.producto.nombre_completo }}</strong> en {{ a.sucursal.nombre_visible }}
+            <p class="text-xs text-pizarra-600">Variación: <strong class="text-tomate-600">{{ a.variacion_porcentual }}%</strong> · Estado: {{ a.get_estado_display }}</p>
+          </div>
+          <a href="{% url 'precios:cola_revision' %}" class="btn-secundario !py-1.5 !px-3.5 text-xs">Revisar →</a>
+        </div>
+      {% empty %}
+        <p class="text-sm text-pizarra-600">Sin variaciones atípicas pendientes.</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+<script src="{% static 'js/graficos.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% load static humanize %}
+{% block titulo %}Luca — Observatorio de Precios · Pedro Aguirre Cerda{% endblock %}
+
+{% block estilos_extra %}
+<link rel="stylesheet" href="{% static 'vendor/maplibre-gl/maplibre-gl.css' %}">
+{% endblock %}
+
+{% block contenido %}
+<div class="space-y-9">
+  {# Hero cálido "Almacén de barrio" + Buscador tipo píldora (# REQ-04, REQ-11) #}
+  <section class="tarjeta-luca hero-luca border-2 border-luca-400/50 relative overflow-hidden !p-6 sm:!p-9">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
+      <div class="lg:col-span-8 space-y-4">
+        <span class="cinta-luca">
+          <span class="punto-vivo" aria-hidden="true"></span>
+          Pedro Aguirre Cerda · Cada luca cuenta
+        </span>
+        <h1 class="text-3xl sm:text-5xl leading-[1.12] text-tinta-900">
+          Compara precios del comercio local <span class="text-ahorro-600">antes de salir de casa</span>
+        </h1>
+        <p class="text-pizarra-600 text-lg max-w-2xl">
+          Busca un producto de la canasta básica y descubre en qué almacén, feria, farmacia o supermercado de la comuna ahorras más hoy.
+        </p>
+
+        <form action="{% url 'portal:buscar' %}" method="get" role="search" class="flex flex-col sm:flex-row gap-2.5 pt-1 bg-white p-2 rounded-3xl sm:rounded-full shadow-luca border border-crema-200">
+          <label for="buscador-hero" class="sr-only">Buscar producto por nombre o marca</label>
+          <div class="flex items-center gap-2 flex-1 px-3">
+            <svg class="w-5 h-5 text-pizarra-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input
+              id="buscador-hero"
+              type="search"
+              name="q"
+              placeholder="Ej: arroz, aceite, pan, leche, palta, paracetamol..."
+              class="w-full min-h-tactil bg-transparent text-tinta-900 text-base sm:text-lg focus:outline-none"
+            >
+          </div>
+          <button type="submit" class="btn-primario !px-8 text-base sm:text-lg shrink-0">Buscar precios</button>
+        </form>
+
+        <div class="flex flex-wrap items-center gap-2 text-sm pt-1">
+          <span class="text-pizarra-600 font-bold">Búsquedas rápidas:</span>
+          <a href="{% url 'portal:buscar' %}?q=arroz" class="px-3 py-1 rounded-full bg-white border border-crema-200 font-bold text-tinta-900 hover:bg-ahorro-100 hover:border-ahorro-600 transition-colors">Arroz</a>
+          <a href="{% url 'portal:buscar' %}?q=aceite" class="px-3 py-1 rounded-full bg-white border border-crema-200 font-bold text-tinta-900 hover:bg-ahorro-100 hover:border-ahorro-600 transition-colors">Aceite</a>
+          <a href="{% url 'portal:buscar' %}?q=leche" class="px-3 py-1 rounded-full bg-white border border-crema-200 font-bold text-tinta-900 hover:bg-ahorro-100 hover:border-ahorro-600 transition-colors">Leche</a>
+          <a href="{% url 'portal:buscar' %}?q=palta" class="px-3 py-1 rounded-full bg-white border border-crema-200 font-bold text-tinta-900 hover:bg-ahorro-100 hover:border-ahorro-600 transition-colors">Palta</a>
+          <a href="{% url 'portal:buscar' %}?q=paracetamol" class="px-3 py-1 rounded-full bg-white border border-crema-200 font-bold text-tinta-900 hover:bg-ahorro-100 hover:border-ahorro-600 transition-colors">Paracetamol</a>
+        </div>
+      </div>
+
+      <div class="lg:col-span-4 flex flex-col items-center justify-center gap-2">
+        <div class="relative flex items-center justify-center">
+          <div class="w-44 h-44 sm:w-52 sm:h-52 rounded-full bg-luca-100/80 border-2 border-luca-400/40 flex items-center justify-center shadow-luca-suave">
+            <img src="{% static 'img/marca/mascota-lucas-saludando.svg' %}" alt="Mascota Lucas invitando a comparar precios" class="w-36 sm:w-44 h-auto flotar-suave">
+          </div>
+        </div>
+        <span class="text-xs font-titulo font-extrabold text-ahorro-700 bg-ahorro-100 px-3 py-1 rounded-full">¡Hola vecino! Hoy te ayudo a ahorrar</span>
+      </div>
+    </div>
+  </section>
+
+  {# Carrusel accesible cálido de destacados (# II.9 / REQ-12) #}
+  {% if banners %}
+  <section data-carrusel aria-roledescription="carrusel" aria-label="Avisos y ofertas destacadas" class="rounded-tarjeta bg-gradient-to-r from-luca-100 via-crema-50 to-ahorro-100 border-2 border-luca-400/70 shadow-luca p-6 sm:p-8 relative overflow-hidden">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+      <span class="text-xs uppercase tracking-wider font-titulo font-extrabold text-tinta-700">Destacados de la semana</span>
+      <div class="flex items-center gap-1.5">
+        <button type="button" data-prev class="min-h-tactil px-3.5 rounded-full bg-white text-tinta-900 border border-crema-200 hover:bg-tinta-900 hover:text-white font-bold transition-colors" aria-label="Anterior destacado">←</button>
+        <button type="button" data-pausa class="min-h-tactil px-3.5 rounded-full bg-white text-tinta-900 border border-crema-200 hover:bg-tinta-900 hover:text-white font-bold text-sm transition-colors" aria-pressed="false">⏸ Pausar</button>
+        <button type="button" data-next class="min-h-tactil px-3.5 rounded-full bg-white text-tinta-900 border border-crema-200 hover:bg-tinta-900 hover:text-white font-bold transition-colors" aria-label="Siguiente destacado">→</button>
+      </div>
+    </div>
+    {% for b in banners %}
+      <div data-slide class="{% if not forloop.first %}hidden{% endif %} space-y-3" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
+        <span class="cinta-oferta">{{ b.get_tipo_display }}</span>
+        <h2 class="text-2xl sm:text-3xl text-tinta-900">{{ b.titulo }}</h2>
+        <p class="text-pizarra-600 max-w-2xl">{{ b.subtitulo }}</p>
+        <a href="{{ b.enlace }}" class="btn-primario mt-2">Ver dónde conviene →</a>
+      </div>
+    {% endfor %}
+    <div class="flex gap-2 mt-5" role="group" aria-label="Elegir destacado">
+      {% for b in banners %}
+        <button type="button" data-punto class="w-3.5 h-3.5 rounded-full transition-colors {% if forloop.first %}bg-ahorro-600{% else %}bg-tinta-900/25{% endif %}" aria-label="Ir al destacado {{ forloop.counter }}"></button>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {# Bloque Ferias abiertas HOY con indicador pulsante #}
+  {% if ferias_hoy %}
+  <section class="tarjeta-luca bg-tinte-menta/60 border-2 border-ahorro-600/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="space-y-1.5">
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-ahorro-700 font-titulo font-extrabold text-xs shadow-sm">
+        <span class="punto-vivo" aria-hidden="true"></span>
+        Abiertas hoy · {{ ferias_hoy.dia_actual_nombre }}
+      </span>
+      <h2 class="text-2xl text-tinta-900">Ferias libres funcionando hoy en PAC ({{ ferias_hoy.abiertas_hoy|length }})</h2>
+      <p class="text-sm text-pizarra-600">
+        {% for item in ferias_hoy.abiertas_hoy %}
+          <strong class="text-tinta-900">{{ item.sucursal.nombre_visible }}</strong> ({{ item.sucursal.horario }}){% if not forloop.last %} · {% endif %}
+        {% empty %}
+          Revisa el calendario semanal de ferias libres de la comuna.
+        {% endfor %}
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-2 shrink-0">
+      <a href="{% url 'portal:ferias_hoy' %}" class="btn-primario !py-2.5 !px-5 text-sm">Ver calendario de ferias</a>
+      {% if user.is_authenticated and user.rol == "VECINO" %}
+        <a href="{% url 'portal:mi_canasta' %}" class="btn-acento !py-2.5 !px-5 text-sm">Armar mi lista</a>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  {# Grilla Bento de Categorías con tintes suaves de color (# REQ-01, REQ-04) #}
+  <section class="space-y-4" data-animar>
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <h2 class="text-2xl sm:text-3xl">Explora por categoría</h2>
+        <p class="text-sm text-pizarra-600">Toca una categoría para ver dónde conviene comprar hoy.</p>
+      </div>
+      <a href="{% url 'portal:buscar' %}?canasta=1" class="btn-secundario !py-2 !px-4 text-sm">Ver canasta básica →</a>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
+      {% for cat in categorias %}
+        <a href="{% url 'portal:buscar' %}?categoria={{ cat.slug }}"
+           class="rounded-tarjeta p-4 flex flex-col items-center text-center gap-2 border border-tinta-900/10 shadow-luca-suave hover:-translate-y-1 hover:shadow-luca transition-all duration-200
+           {% cycle 'bg-tinte-menta' 'bg-tinte-mantequilla' 'bg-tinte-durazno' 'bg-tinte-cielo' 'bg-tinte-lavanda' %}">
+          <span class="w-12 h-12 rounded-2xl bg-white/85 flex items-center justify-center text-2xl shadow-sm" aria-hidden="true">{{ cat.icono }}</span>
+          <span class="font-titulo font-extrabold text-tinta-900 text-base leading-snug">{{ cat.nombre }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# Hoy conviene — mejores ofertas vigentes (# REQ-03, REQ-04, REQ-13) #}
+  <section class="space-y-4" data-animar>
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <span class="cinta-oferta mb-1">Ahorro de la semana</span>
+        <h2 class="text-2xl sm:text-3xl">Hoy conviene en Pedro Aguirre Cerda</h2>
+        <p class="text-sm text-pizarra-600">Ofertas vigentes con mayor descuento real y condiciones claras.</p>
+      </div>
+      <a href="{% url 'portal:ofertas' %}" class="btn-secundario !py-2 !px-5 text-sm">Ver todas las ofertas</a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for p in hoy_conviene %}
+        <article class="tarjeta-interactiva flex flex-col justify-between gap-3">
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="cinta-oferta">−{{ p.porcentaje_descuento }}% · Ahorras ${{ p.ahorro_clp|intcomma }}</span>
+              {% if p.es_demo %}<span class="text-xs font-semibold text-pizarra-600 bg-crema-100 px-2.5 py-0.5 rounded-full">Demo</span>{% endif %}
+            </div>
+            <h3 class="text-xl leading-snug"><a href="{% url 'portal:comparar' p.producto.id %}" class="hover:text-ahorro-600 transition-colors">{{ p.producto.nombre_completo }}</a></h3>
+            <p class="text-sm text-pizarra-600">{{ p.sucursal.nombre_visible }} · {{ p.sucursal.sector }}</p>
+            {% for et in p.etiquetas_condiciones %}
+              <span class="inline-block text-xs font-bold bg-luca-100 text-tinta-900 px-2.5 py-0.5 rounded-full">{{ et }}</span>
+            {% endfor %}
+          </div>
+          <div class="pt-3 border-t border-crema-200 flex items-end justify-between gap-2">
+            <div>
+              <p class="text-sm line-through text-pizarra-500 tabular-nums">${{ p.precio_normal|intcomma }}</p>
+              <p class="text-3xl precio-destacado text-ahorro-600">${{ p.precio_oferta|intcomma }}</p>
+              <p class="text-xs text-pizarra-600">${{ p.precio_por_unidad|intcomma }} / {{ p.producto.etiqueta_unidad_comparacion }}</p>
+            </div>
+            <a href="{% url 'portal:comparar' p.producto.id %}" class="btn-primario !py-2 !px-4 text-sm">Comparar</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# Indicadores Bento + Mini mapa (# REQ-05, REQ-07) #}
+  <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch" data-animar>
+    <div class="lg:col-span-5 tarjeta-luca flex flex-col justify-between gap-4">
+      <div class="space-y-1">
+        <span class="cinta-luca">Transparencia abierta</span>
+        <h2 class="text-2xl">El observatorio en cifras</h2>
+        <p class="text-sm text-pizarra-600">Cobertura comunal abierta para vecinos y comerciantes.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="rounded-2xl bg-tinte-cielo p-4"><p class="text-3xl precio-destacado text-tinta-900">{{ kpis.productos_monitoreados }}</p><p class="text-xs font-bold text-tinta-900">Productos monitoreados</p></div>
+        <div class="rounded-2xl bg-tinte-menta p-4"><p class="text-3xl precio-destacado text-ahorro-700">{{ kpis.comercios_activos }}</p><p class="text-xs font-bold text-ahorro-700">Locales en la comuna</p></div>
+        <div class="rounded-2xl bg-tinte-durazno p-4"><p class="text-3xl precio-destacado text-tomate-600">{{ kpis.ofertas_vigentes }}</p><p class="text-xs font-bold text-tomate-600">Ofertas vigentes hoy</p></div>
+        <div class="rounded-2xl bg-tinte-mantequilla p-4"><p class="text-3xl precio-destacado text-tinta-900">{{ kpis.precios_registrados|intcomma }}</p><p class="text-xs font-bold text-tinta-900">Registros históricos</p></div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a href="{% url 'portal:transparencia' %}" class="btn-secundario !py-2 text-sm flex-1 text-center">Cómo funciona</a>
+        <a href="{% url 'portal:faq' %}" class="btn-secundario !py-2 text-sm flex-1 text-center">Preguntas frecuentes</a>
+      </div>
+    </div>
+
+    <div class="lg:col-span-7 tarjeta-luca space-y-3 flex flex-col">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-2xl">Comercios en Pedro Aguirre Cerda</h2>
+        <a href="{% url 'portal:mapa' %}" class="text-ahorro-700 font-titulo font-extrabold underline">Abrir mapa completo →</a>
+      </div>
+      <div id="mapa-luca" data-embebido="1" class="w-full flex-1 min-h-[18rem] rounded-2xl border border-crema-200 z-10" aria-label="Mapa de comercios de Pedro Aguirre Cerda"></div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script src="{% static 'js/carrusel.js' %}" defer></script>
+<script type="module" src="{% static 'js/mapa.js' %}"></script>
+<script src="{% static 'js/animaciones.js' %}" defer></script>
+{% endblock %}

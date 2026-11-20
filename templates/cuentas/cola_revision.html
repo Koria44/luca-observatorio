@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block titulo %}Revisión de cuentas de comerciantes — Luca{% endblock %}
+
+{% block contenido %}
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl">Revisión y aprobación de comerciantes</h1>
+    <p class="text-gris-700">Flujo obligatorio: <strong>Pendiente → Verificada (Fiscalizador) → Activa (Administrador DIDESE)</strong>.</p>
+  </div>
+
+  <div class="space-y-4">
+    {% for cuenta in cuentas %}
+      <article class="tarjeta-luca flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="text-xl">{{ cuenta.nombre_completo }}</h2>
+            <span class="px-3 py-0.5 rounded-full text-sm font-bold
+              {% if cuenta.estado_cuenta == 'ACTIVA' %}bg-verde-100 text-verde-700
+              {% elif cuenta.estado_cuenta == 'VERIFICADA' %}bg-turquesa-100 text-turquesa-700
+              {% elif cuenta.estado_cuenta == 'RECHAZADA' %}bg-rojo-100 text-rojo-600
+              {% else %}bg-ambar-100 text-marino-900{% endif %}">
+              {{ cuenta.get_estado_cuenta_display }}
+            </span>
+          </div>
+          <p class="text-sm text-gris-700">Correo: {{ cuenta.email }} · RUT: {{ cuenta.rut_enmascarado }} · Tel: {{ cuenta.telefono }}</p>
+          {% if cuenta.datos_registro_comercio.nombre_fantasia %}
+            <p class="text-sm text-marino-900">Local solicitado: <strong>{{ cuenta.datos_registro_comercio.nombre_fantasia }}</strong> — {{ cuenta.datos_registro_comercio.direccion_sucursal }} ({{ cuenta.datos_registro_comercio.sector }})</p>
+          {% endif %}
+          {% if cuenta.motivo_rechazo %}
+            <p class="text-sm text-rojo-600 font-semibold">Motivo rechazo: {{ cuenta.motivo_rechazo }}</p>
+          {% endif %}
+        </div>
+
+        <div class="flex flex-wrap gap-2 items-center">
+          {% if cuenta.estado_cuenta == "PENDIENTE" %}
+            <form method="post" action="{% url 'cuentas:verificar_cuenta' cuenta.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="accion" value="verificar">
+              <button type="submit" class="btn-primario !py-2 !px-4 text-sm">✔ Marcar verificada</button>
+            </form>
+            <form method="post" action="{% url 'cuentas:verificar_cuenta' cuenta.id %}" class="flex gap-2 items-center">
+              {% csrf_token %}
+              <input type="hidden" name="accion" value="rechazar">
+              <input type="text" name="motivo" required placeholder="Motivo de rechazo" aria-label="Motivo de rechazo" class="campo-entrada !py-2 text-sm w-44">
+              <button type="submit" class="btn-secundario !py-2 !px-3 text-sm text-rojo-600 border-rojo-600">Rechazar</button>
+            </form>
+          {% elif cuenta.estado_cuenta == "VERIFICADA" and user.rol == "ADMIN" or cuenta.estado_cuenta == "VERIFICADA" and user.is_superuser %}
+            <form method="post" action="{% url 'cuentas:aprobar_cuenta' cuenta.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-acento !py-2 !px-4 text-sm">✔ Aprobar y activar</button>
+            </form>
+          {% endif %}
+        </div>
+      </article>
+    {% empty %}
+      <div class="tarjeta-luca text-center text-gris-700">No hay cuentas de comerciantes registradas aún.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

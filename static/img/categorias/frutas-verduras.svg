@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-labelledby="t-frutas-verduras d-frutas-verduras">
+  <title id="t-frutas-verduras">Categoría Frutas y verduras</title>
+  <desc id="d-frutas-verduras">Ilustración referencial de Luca para productos de la categoría Frutas y verduras.</desc>
+  <rect width="240" height="240" rx="28" fill="#E7F6ED"/>
+  <circle cx="120" cy="102" r="62" fill="#FFFFFF" stroke="#187540" stroke-width="6"/>
+  <text x="120" y="122" text-anchor="middle" font-size="64">🥬</text>
+  <rect x="24" y="182" width="192" height="34" rx="17" fill="#187540"/>
+  <text x="120" y="204" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#FFFFFF">Frutas y verduras</text>
+</svg>

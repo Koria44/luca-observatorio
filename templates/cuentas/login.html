@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Ingresar — Luca{% endblock %}
+
+{% block contenido %}
+<div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+  <section class="md:col-span-5 rounded-tarjeta hero-luca border-2 border-luca-400/60 shadow-luca p-6 sm:p-8 flex flex-col justify-between gap-4 text-center md:text-left">
+    <div class="space-y-3">
+      <span class="cinta-luca">Bienvenido a Luca</span>
+      <h2 class="text-2xl sm:text-3xl leading-snug">Tu aliado para ahorrar en Pedro Aguirre Cerda</h2>
+      <p class="text-sm text-pizarra-600">Arma tu lista privada de compras, recibe alertas cuando bajen los precios o publica los precios de tu local.</p>
+    </div>
+    <div class="flex justify-center py-2">
+      <img src="{% static 'img/marca/mascota-lucas-saludando.svg' %}" alt="Mascota Lucas saludando" class="w-36 h-auto flotar-suave">
+    </div>
+    <p class="text-xs font-bold text-ahorro-700 bg-white/80 rounded-full px-3 py-1.5 text-center">Cada luca cuenta · Acceso seguro</p>
+  </section>
+
+  <section class="md:col-span-7 tarjeta-luca space-y-6">
+    <div class="space-y-1">
+      <h1 class="text-3xl">Ingresar a mi cuenta</h1>
+      <p class="text-pizarra-600">Accede con tu correo electrónico y contraseña.</p>
+    </div>
+
+    {% if form.non_field_errors %}
+      <div role="alert" class="rounded-2xl bg-rojo-100 border-l-4 border-rojo-600 text-rojo-600 p-4 font-bold text-sm">
+        {% for err in form.non_field_errors %}<p>✘ {{ err }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="space-y-5" novalidate>
+      {% csrf_token %}
+      {% include "componentes/campo.html" with field=form.email %}
+      {% include "componentes/campo.html" with field=form.password %}
+      <button type="submit" class="btn-primario w-full">Entrar a mi cuenta</button>
+    </form>
+
+    <div class="pt-4 border-t border-crema-200 space-y-3 text-base">
+      <p><a href="{% url 'cuentas:recuperar' %}" class="text-tinta-700 font-bold underline">¿Olvidaste tu contraseña?</a></p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <a href="{% url 'cuentas:registro_vecino' %}" class="btn-secundario text-center text-sm">Crear cuenta de vecino</a>
+        <a href="{% url 'cuentas:registro_comerciante' %}" class="btn-acento text-center text-sm">Registrar mi comercio</a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

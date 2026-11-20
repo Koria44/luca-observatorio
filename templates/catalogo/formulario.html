@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }} — Luca{% endblock %}
+{% block contenido %}
+<div class="max-w-2xl mx-auto tarjeta-luca space-y-5">
+  <h1 class="text-3xl">{{ titulo }}</h1>
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+      {% include "componentes/campo.html" with field=field %}
+    {% endfor %}
+    <div class="flex gap-3 pt-2">
+      <button type="submit" class="btn-primario">Guardar producto</button>
+      <a href="{% url 'catalogo:lista' %}" class="btn-secundario">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

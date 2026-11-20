@@ -1,0 +1,28 @@
+{
+  "name": "Luca — Observatorio de Precios · Pedro Aguirre Cerda",
+  "short_name": "Luca PAC",
+  "description": "Cada luca cuenta. Compara precios y ofertas del comercio local en Pedro Aguirre Cerda.",
+  "lang": "es-CL",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFBF2",
+  "theme_color": "#12385C",
+  "icons": [
+    {
+      "src": "/static/img/marca/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/img/marca/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/img/marca/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

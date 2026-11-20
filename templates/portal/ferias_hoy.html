@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static l10n %}
+{% block titulo %}Ferias Libres Abiertas Hoy — Luca{% endblock %}
+
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div class="space-y-1">
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-ahorro-100 text-ahorro-700 font-titulo font-extrabold text-xs">
+        <span class="punto-vivo" aria-hidden="true"></span>
+        Calendario comunal · Pedro Aguirre Cerda
+      </span>
+      <h1 class="text-3xl sm:text-4xl">Ferias libres funcionando hoy ({{ dia_actual_nombre }})</h1>
+      <p class="text-pizarra-600">Consulta qué ferias libres y mercados están abiertos hoy o revisa cualquier otro día de la semana.</p>
+    </div>
+    <a href="{% url 'portal:mapa' %}?tipo=FERIA" class="btn-primario !py-2.5 !px-5 text-sm">Ver ferias en el mapa</a>
+  </div>
+
+  {# Selector tipo píldora por día de la semana #}
+  <div class="flex flex-wrap gap-2" role="navigation" aria-label="Filtrar ferias por día">
+    {% for idx, nom, _ in dias_semana %}
+      <a href="?dia={{ idx }}" class="chip-filtro {% if dia_actual_idx == idx %}bg-ahorro-600 text-white border-ahorro-600 shadow-luca-suave{% else %}bg-white border-crema-200 text-tinta-900 hover:border-ahorro-600 hover:bg-ahorro-100/50{% endif %}">
+        {{ nom }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <section class="space-y-3">
+    <h2 class="text-2xl">Abiertas el {{ dia_actual_nombre }} ({{ abiertas_hoy|length }})</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {% for item in abiertas_hoy %}
+        <article class="tarjeta-interactiva border-2 border-ahorro-600/40 bg-gradient-to-br from-white to-tinte-menta/40 space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="cinta-mejor-precio">
+              <span class="w-2 h-2 rounded-full bg-white" aria-hidden="true"></span>
+              Abierta {{ dia_actual_nombre }}
+            </span>
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white text-pizarra-600 border border-crema-200">{{ item.sucursal.sector }}</span>
+          </div>
+          <h3 class="text-xl">{{ item.sucursal.nombre_visible }}</h3>
+          <p class="text-sm text-pizarra-600">{{ item.sucursal.direccion }}</p>
+          <p class="text-sm font-bold text-tinta-900">Horario: {{ item.sucursal.horario }}</p>
+          <div class="flex flex-wrap gap-2 pt-2">
+            <a href="{% url 'portal:detalle_sucursal' item.sucursal.id %}" class="btn-primario !py-2 !px-4 text-sm">Ver precios</a>
+            <a href="https://www.google.com/maps/dir/?api=1&destination={{ item.sucursal.latitud|unlocalize }},{{ item.sucursal.longitud|unlocalize }}" target="_blank" rel="noopener noreferrer" class="btn-secundario !py-2 !px-4 text-sm">Cómo llegar en Google Maps ↗</a>
+          </div>
+        </article>
+      {% empty %}
+        <div class="md:col-span-2 tarjeta-luca text-center space-y-3 py-8">
+          <img src="{% static 'img/marca/mascota-lucas-dormido.svg' %}" alt="Lucas descansando" class="w-24 mx-auto">
+          <p class="font-bold text-tinta-900">No hay ferias programadas para el {{ dia_actual_nombre }}.</p>
+          <p class="text-sm text-pizarra-600">Elige otro día en los botones de arriba para ver el calendario.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="tarjeta-luca space-y-3">
+    <h2 class="text-xl">Calendario semanal completo de ferias en PAC</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm border-collapse">
+        <thead>
+          <tr class="border-b-2 border-tinta-900"><th class="py-2 pr-3">Feria / Mercado</th><th class="py-2 pr-3">Sector</th><th class="py-2 pr-3">Días</th><th class="py-2">Horario</th></tr>
+        </thead>
+        <tbody>
+          {% for item in todas %}
+            <tr class="border-b border-crema-200">
+              <td class="py-2.5 pr-3 font-bold"><a href="{% url 'portal:detalle_sucursal' item.sucursal.id %}" class="underline hover:text-ahorro-600">{{ item.sucursal.nombre_visible }}</a></td>
+              <td class="py-2.5 pr-3">{{ item.sucursal.sector }}</td>
+              <td class="py-2.5 pr-3">{{ item.dias_nombres|join:", " }}</td>
+              <td class="py-2.5">{{ item.sucursal.horario }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

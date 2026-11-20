@@ -1,0 +1,15 @@
+# Dependencias de producción — Luca (Observatorio de Precios · Pedro Aguirre Cerda)
+# Se usan rangos acotados compatibles con Python 3.12 (Vercel) y Python 3.14 (local).
+Django>=5.1,<5.3
+python-dotenv>=1.0.1,<2.0
+dj-database-url>=2.2.0,<3.0
+psycopg[binary]>=3.2.0,<4.0
+whitenoise>=6.8.0,<7.0
+django-storages[s3]>=1.14.4,<2.0
+django-axes>=7.0.0,<9.0
+django-csp>=3.8,<5.0
+openpyxl>=3.1.5,<4.0
+reportlab>=4.2.5,<5.0
+Pillow>=11.0.0,<13.0
+PyYAML>=6.0.2,<7.0
+requests>=2.32.0,<3.0

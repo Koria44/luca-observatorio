@@ -1,0 +1,31 @@
+"""Admin técnico en modo estrictamente solo lectura para `RegistroAuditoria` (# REQ-15)."""
+from django.contrib import admin
+
+from .models import RegistroAuditoria
+
+
+@admin.register(RegistroAuditoria)
+class RegistroAuditoriaAdmin(admin.ModelAdmin):
+    list_display = ("fecha", "usuario", "accion", "modelo", "objeto_id", "ip")
+    list_filter = ("accion", "modelo", "fecha")
+    search_fields = ("usuario__email", "objeto_id", "modelo")
+    readonly_fields = (
+        "usuario",
+        "accion",
+        "modelo",
+        "objeto_id",
+        "valores_anteriores",
+        "valores_nuevos",
+        "ip",
+        "user_agent",
+        "fecha",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="titulo-fav desc-fav">
+  <title id="titulo-fav">Ícono de Luca</title>
+  <desc id="desc-fav">Versión simplificada del símbolo de Luca: moneda ámbar con lupa turquesa sonriente y punto coral.</desc>
+  <!-- Versión simplificada de trazo grueso para máxima legibilidad a 16 px y 32 px -->
+  <circle cx="30" cy="30" r="24" fill="#F5A623" stroke="#12385C" stroke-width="5"/>
+  <line x1="38" y1="38" x2="48" y2="48" stroke="#12385C" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="51" cy="51" r="8" fill="#E4572E" stroke="#12385C" stroke-width="3.5"/>
+  <circle cx="51" cy="51" r="2.2" fill="#FFFFFF"/>
+  <circle cx="28" cy="28" r="13" fill="#FFFFFF" stroke="#0F8B8D" stroke-width="5"/>
+  <circle cx="24" cy="26" r="2.2" fill="#12385C"/>
+  <circle cx="32" cy="26" r="2.2" fill="#12385C"/>
+  <path d="M 23 31 Q 28 36 33 31" fill="none" stroke="#12385C" stroke-width="2.8" stroke-linecap="round"/>
+</svg>

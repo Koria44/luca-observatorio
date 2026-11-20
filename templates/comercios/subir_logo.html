@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Logo de {{ comercio.nombre_fantasia }} — Luca{% endblock %}
+{% block contenido %}
+<div class="max-w-xl mx-auto tarjeta-luca space-y-5">
+  <div>
+    <h1 class="text-3xl">Logo de {{ comercio.nombre_fantasia }}</h1>
+    <p class="text-gris-700 text-sm">Estado actual: <strong>{{ comercio.get_logo_estado_display }}</strong>. Al subir un logo nuevo, un fiscalizador lo revisará antes de mostrarlo en el portal.</p>
+  </div>
+
+  {% if comercio.logo_estado == "RECHAZADO" and comercio.logo_motivo_rechazo %}
+    <div role="alert" class="rounded-xl bg-rojo-100 border-2 border-rojo-600 text-rojo-600 p-3 text-sm font-bold">
+      ✘ Motivo de rechazo anterior: {{ comercio.logo_motivo_rechazo }}
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="space-y-4">
+    {% csrf_token %}
+    <div>
+      <label for="id-logo" class="block font-titulo font-bold text-marino-900 mb-1">Selecciona tu logo (JPG, PNG o WebP, máx. 4 MB)</label>
+      <input id="id-logo" type="file" name="logo" accept="image/jpeg,image/png,image/webp" required data-subir-imagen class="campo-entrada">
+      <p id="aviso-imagen" aria-live="polite" class="text-sm font-semibold text-turquesa-700 mt-1"></p>
+      <img id="preview-imagen" alt="Vista previa del logo" class="hidden mt-3 w-32 h-32 object-contain rounded-xl border border-gris-200 bg-white">
+    </div>
+    <button type="submit" class="btn-primario w-full">Subir logo para revisión</button>
+  </form>
+</div>
+{% endblock %}
+{% block scripts_extra %}
+<script src="{% static 'js/subir-imagen.js' %}" defer></script>
+{% endblock %}

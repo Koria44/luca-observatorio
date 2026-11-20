@@ -1,0 +1,201 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1B2A4A">
+  <meta name="description" content="Luca — Observatorio de Precios del Comercio Local en Pedro Aguirre Cerda. Cada luca cuenta.">
+  <meta property="og:title" content="{% block og_titulo %}Luca — Observatorio de Precios · Pedro Aguirre Cerda{% endblock %}">
+  <meta property="og:description" content="Compara precios, descubre ofertas y encuentra comercios cercanos en Pedro Aguirre Cerda.">
+  <meta property="og:image" content="{% static 'img/marca/og-imagen.png' %}">
+  <title>{% block titulo %}Luca — Observatorio de Precios · Pedro Aguirre Cerda{% endblock %}</title>
+
+  <link rel="icon" href="{% static 'img/marca/favicon.svg' %}" type="image/svg+xml">
+  <link rel="icon" href="{% static 'img/marca/favicon-32.png' %}" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'img/marca/favicon-180.png' %}">
+  <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Baloo+2:wght@700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/salida.css' %}?v=20261120">
+  {% block estilos_extra %}{% endblock %}
+</head>
+<body
+  class="min-h-screen flex flex-col bg-crema-50 text-tinta-900 pb-20 md:pb-0"
+  data-autenticado="{% if user.is_authenticated %}1{% else %}0{% endif %}"
+  data-url-latido="{% url 'cuentas:latido' %}"
+  data-limite-inactividad="{% if user.is_authenticated and user.es_staff_observatorio %}900{% else %}1800{% endif %}"
+>
+  {# # REQ-12: Enlace de salto al contenido principal #}
+  <a href="#contenido-principal" class="enlace-saltar">Ir al contenido principal</a>
+
+  {# Barra superior discreta de accesibilidad (# REQ-12) #}
+  <div class="bg-tinta-900 text-crema-50 text-xs sm:text-sm py-1.5 px-3 sm:px-4" role="region" aria-label="Herramientas de accesibilidad">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <span class="font-semibold tracking-wide text-crema-100">Pedro Aguirre Cerda · Cada luca cuenta</span>
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button type="button" id="btn-texto-menos" class="px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-white/20 font-bold transition-colors" aria-label="Disminuir tamaño de texto">A−</button>
+        <button type="button" id="btn-texto-normal" class="px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-white/20 font-bold transition-colors" aria-label="Tamaño de texto normal">A</button>
+        <button type="button" id="btn-texto-mas" class="px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-white/20 font-bold transition-colors" aria-label="Aumentar tamaño de texto">A+</button>
+        <button type="button" id="btn-modo-oscuro" class="px-3 py-0.5 rounded-full bg-luca-400 text-tinta-900 font-bold hover:bg-luca-500 hover:text-white transition-colors" aria-pressed="false">🌙 Modo oscuro</button>
+      </div>
+    </div>
+  </div>
+
+  {# Encabezado amigable con íconos SVG unificados #}
+  <header class="bg-white/95 backdrop-blur border-b border-crema-200 shadow-luca-suave sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-3">
+      <a href="{% url 'portal:inicio' %}" class="flex items-center gap-2 shrink-0">
+        <img src="{% static 'img/marca/luca-horizontal.svg' %}" alt="Luca — Observatorio de Precios · Pedro Aguirre Cerda" class="h-11 sm:h-13 w-auto">
+      </a>
+
+      <nav aria-label="Navegación principal" class="hidden md:flex items-center gap-1 flex-wrap">
+        <a href="{% url 'portal:inicio' %}" class="min-h-tactil inline-flex items-center gap-1.5 px-3 py-2 rounded-full font-titulo font-bold text-tinta-900 hover:bg-crema-100 transition-colors">Inicio</a>
+        <a href="{% url 'portal:buscar' %}" class="min-h-tactil inline-flex items-center gap-1.5 px-3 py-2 rounded-full font-titulo font-bold text-tinta-900 hover:bg-crema-100 transition-colors">
+          <svg class="w-4 h-4 text-ahorro-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          Buscar
+        </a>
+        <a href="{% url 'portal:ofertas' %}" class="min-h-tactil inline-flex items-center gap-1.5 px-3 py-2 rounded-full font-titulo font-bold text-tomate-600 hover:bg-tomate-100 transition-colors">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l6.59-6.59a1 1 0 0 0 0-1.41Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
+          Ofertas
+        </a>
+        <a href="{% url 'portal:ferias_hoy' %}" class="min-h-tactil inline-flex items-center gap-1.5 px-3 py-2 rounded-full font-titulo font-bold text-ahorro-700 hover:bg-ahorro-100 transition-colors">
+          <span class="punto-vivo" aria-hidden="true"></span>
+          Ferias hoy
+        </a>
+        <a href="{% url 'portal:mapa' %}" class="min-h-tactil inline-flex items-center gap-1.5 px-3 py-2 rounded-full font-titulo font-bold text-tinta-700 hover:bg-tinta-100 transition-colors">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          Mapa
+        </a>
+        {% if user.is_authenticated and user.rol == "VECINO" %}
+          <a href="{% url 'portal:mi_canasta' %}" class="min-h-tactil inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full font-titulo font-bold bg-luca-100 text-tinta-900 hover:bg-luca-400 transition-colors">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            Mi lista <span data-canasta-contador class="hidden px-2 py-0.5 rounded-full bg-ahorro-600 text-white text-xs font-extrabold"></span>
+          </a>
+        {% endif %}
+        <a href="{% url 'portal:transparencia' %}" class="min-h-tactil inline-flex items-center px-3 py-2 rounded-full font-titulo font-bold text-pizarra-600 hover:bg-crema-100 transition-colors">Metodología</a>
+        {% block nav_enlaces_extra %}{% endblock %}
+        {% if user.is_authenticated %}
+          {% if user.rol == "ADMIN" or user.is_superuser %}
+            <a href="{% url 'panel:admin' %}" class="min-h-tactil inline-flex items-center px-3.5 py-2 rounded-full font-titulo font-bold bg-tinta-100 text-tinta-900 hover:bg-tinta-900 hover:text-white transition-colors">Panel DIDESE</a>
+          {% elif user.rol == "FISCALIZADOR" %}
+            <a href="{% url 'panel:fiscalizador' %}" class="min-h-tactil inline-flex items-center px-3.5 py-2 rounded-full font-titulo font-bold bg-tinta-100 text-tinta-900 hover:bg-tinta-900 hover:text-white transition-colors">Panel</a>
+          {% elif user.rol == "COMERCIANTE" %}
+            {% if user.estado_cuenta == "ACTIVA" %}
+              <a href="{% url 'panel:comerciante' %}" class="min-h-tactil inline-flex items-center px-3.5 py-2 rounded-full font-titulo font-bold bg-ahorro-100 text-ahorro-700 hover:bg-ahorro-600 hover:text-white transition-colors">Mi comercio</a>
+            {% else %}
+              <a href="{% url 'cuentas:en_revision' %}" class="min-h-tactil inline-flex items-center px-3.5 py-2 rounded-full font-titulo font-bold bg-tomate-100 text-tomate-600 hover:bg-tomate-600 hover:text-white transition-colors">Estado cuenta</a>
+            {% endif %}
+          {% endif %}
+          <a href="{% url 'cuentas:perfil' %}" class="min-h-tactil inline-flex items-center px-3 py-2 rounded-full font-titulo font-bold text-tinta-900 hover:bg-crema-100 transition-colors">{{ user.nombres }}</a>
+          <form method="post" action="{% url 'cuentas:salir' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="btn-secundario !py-2 !px-4 text-sm">Salir</button>
+          </form>
+        {% else %}
+          <a href="{% url 'cuentas:ingresar' %}" class="btn-tinta !py-2 !px-5 text-sm">Ingresar</a>
+        {% endif %}
+      </nav>
+
+      {# Acceso rápido en móvil #}
+      <div class="flex md:hidden items-center gap-2">
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'cuentas:salir' %}">
+            {% csrf_token %}
+            <button type="submit" class="min-h-tactil px-3.5 py-2 rounded-full border-2 border-tinta-900/20 text-tinta-900 font-bold text-sm">Salir</button>
+          </form>
+        {% else %}
+          <a href="{% url 'cuentas:ingresar' %}" class="min-h-tactil inline-flex items-center px-4 py-2 rounded-full bg-tinta-900 text-white font-bold text-sm">Ingresar</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  {# Mensajes del sistema accesibles (# REQ-12) #}
+  {% if messages %}
+    <div class="max-w-6xl w-full mx-auto px-4 pt-4 space-y-2" aria-live="polite">
+      {% for message in messages %}
+        <div
+          role="{% if 'error' in message.tags %}alert{% else %}status{% endif %}"
+          class="rounded-2xl px-4 py-3 border-l-4 shadow-luca-suave font-semibold flex items-start gap-2.5
+            {% if 'error' in message.tags %}bg-rojo-100 border-rojo-600 text-rojo-600
+            {% elif 'warning' in message.tags %}bg-luca-100 border-luca-500 text-tinta-900
+            {% elif 'success' in message.tags %}bg-ahorro-100 border-ahorro-600 text-ahorro-700
+            {% else %}bg-tinta-100 border-tinta-700 text-tinta-900{% endif %}"
+        >
+          <span aria-hidden="true">{% if 'error' in message.tags %}✘{% elif 'warning' in message.tags %}⚠{% elif 'success' in message.tags %}✔{% else %}ℹ{% endif %}</span>
+          <span>{{ message }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <main id="contenido-principal" class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 sm:py-8">
+    {% block contenido %}{% endblock %}
+  </main>
+
+  {# Pie de página cálido (crema-arena en lugar de bloque azul pesado) #}
+  <footer class="bg-crema-100 text-tinta-900 mt-12 border-t-4 border-luca-400">
+    <div class="max-w-6xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <img src="{% static 'img/marca/luca-horizontal.svg' %}" alt="Luca" class="h-11 w-auto">
+      </div>
+      <div class="text-sm text-center sm:text-right max-w-xl space-y-1 text-pizarra-600">
+        <p class="text-tinta-900"><strong>Proyecto académico (TIHI43).</strong> No es un sitio oficial de la Municipalidad de Pedro Aguirre Cerda.</p>
+        <p>Datos de demostración claramente rotulados · Accesibilidad WCAG 2.1 AA · <a href="{% url 'portal:privacidad' %}" class="underline font-bold text-tinta-900">Privacidad</a> · <a href="{% url 'portal:faq' %}" class="underline font-bold text-tinta-900">Preguntas frecuentes</a></p>
+      </div>
+    </div>
+  </footer>
+
+  {# Navegación inferior fija para teléfonos con íconos SVG limpios (# REQ-11 / II.9) #}
+  <nav aria-label="Navegación móvil" class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur border-t border-crema-200 shadow-luca z-40">
+    <div class="grid grid-cols-5 text-center text-xs font-titulo font-bold">
+      <a href="{% url 'portal:inicio' %}" class="min-h-tactil flex flex-col items-center justify-center py-1.5 text-tinta-900 gap-0.5">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Inicio</span>
+      </a>
+      <a href="{% url 'portal:buscar' %}" class="min-h-tactil flex flex-col items-center justify-center py-1.5 text-ahorro-700 gap-0.5">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Buscar</span>
+      </a>
+      <a href="{% url 'portal:ofertas' %}" class="min-h-tactil flex flex-col items-center justify-center py-1.5 text-tomate-600 gap-0.5">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l6.59-6.59a1 1 0 0 0 0-1.41Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
+        <span>Ofertas</span>
+      </a>
+      <a href="{% url 'portal:mapa' %}" class="min-h-tactil flex flex-col items-center justify-center py-1.5 text-tinta-700 gap-0.5">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Mapa</span>
+      </a>
+      <a href="{% if user.is_authenticated %}{% url 'cuentas:perfil' %}{% else %}{% url 'cuentas:ingresar' %}{% endif %}" class="min-h-tactil flex flex-col items-center justify-center py-1.5 text-tinta-900 gap-0.5">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Cuenta</span>
+      </a>
+    </div>
+  </nav>
+
+  {# Modal accesible de aviso de inactividad (# II.7 / REQ-12) #}
+  {% if user.is_authenticated %}
+    <div id="modal-sesion-inactiva" class="hidden fixed inset-0 z-50 bg-tinta-900/60 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-sesion">
+      <div class="bg-white rounded-tarjeta border-2 border-luca-400 max-w-md w-full p-6 space-y-4 shadow-luca-hover">
+        <h2 id="titulo-modal-sesion" class="text-2xl">¿Sigue ahí?</h2>
+        <p class="text-pizarra-600">Por su seguridad, su sesión se cerrará en menos de 2 minutos si no hay actividad.</p>
+        <div class="flex flex-wrap gap-3 pt-2">
+          <button type="button" id="btn-seguir-conectado" class="btn-primario flex-1">Seguir conectado</button>
+          <form method="post" action="{% url 'cuentas:salir' %}" class="flex-1">
+            {% csrf_token %}
+            <button type="submit" class="btn-secundario w-full">Cerrar sesión</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <script src="{% static 'js/accesibilidad.js' %}?v=20261120" defer></script>
+  <script src="{% static 'js/sesion.js' %}" defer></script>
+  <script src="{% static 'js/canasta.js' %}?v=20261120" defer></script>
+  <script type="module" src="{% static 'js/formularios.js' %}"></script>
+  {% block scripts_extra %}{% endblock %}
+</body>
+</html>

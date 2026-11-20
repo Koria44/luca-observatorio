@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}Comercios y sucursales — Luca{% endblock %}
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-3xl">Comercios y sucursales</h1>
+      <p class="text-gris-700">Cada sucursal se administra por separado con su dirección, sector y coordenadas (# REQ-02).</p>
+    </div>
+    {% if user.rol == "ADMIN" or user.is_superuser %}
+      <a href="{% url 'comercios:crear_comercio' %}" class="btn-primario">+ Registrar comercio</a>
+    {% endif %}
+  </div>
+
+  <div class="space-y-4">
+    {% for comercio in comercios %}
+      <section class="tarjeta-luca space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-xl">{{ comercio.nombre_fantasia }}</h2>
+            <p class="text-sm text-gris-700">{{ comercio.get_tipo_display }} · {{ comercio.razon_social }} · Estado: <strong>{{ comercio.get_estado_display }}</strong></p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {% for suc in comercio.sucursales.all %}
+            <div class="rounded-xl border border-gris-200 p-4 bg-crema-50 flex items-start justify-between gap-3">
+              <div class="space-y-1 text-sm">
+                <p class="font-bold text-marino-900">{{ suc.nombre }}</p>
+                <p>{{ suc.direccion }} · <strong>{{ suc.sector }}</strong></p>
+                <p class="text-gris-700">Horario: {{ suc.horario }}</p>
+                <p class="text-xs text-gris-700">Coord: {{ suc.latitud }}, {{ suc.longitud }}</p>
+              </div>
+              <a href="{% url 'comercios:editar_sucursal' suc.pk %}" class="btn-secundario !py-2 !px-3 text-sm shrink-0">Editar</a>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% empty %}
+      <div class="tarjeta-luca text-center text-gris-700">Aún no tienes comercios o sucursales asociados.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

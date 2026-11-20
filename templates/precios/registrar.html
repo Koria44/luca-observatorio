@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}{% if modo_terreno %}Registro rápido en terreno{% else %}Registrar o actualizar precio{% endif %} — Luca{% endblock %}
+{% block contenido %}
+<div class="max-w-2xl mx-auto tarjeta-luca space-y-5">
+  <div class="space-y-1">
+    <h1 class="text-3xl">{% if modo_terreno %}📍 Levantamiento de precio en terreno{% else %}Registrar o actualizar precio{% endif %}</h1>
+    <p class="text-gris-700">
+      Al actualizar un precio, el valor anterior se conserva automáticamente en el historial (# REQ-03, REQ-06).
+      Si el cambio supera ±40 %, pasará a revisión municipal preventiva.
+    </p>
+  </div>
+
+  {# Escáner de código de barras (EAN) con cámara o ingreso rápido #}
+  <section class="rounded-2xl bg-turquesa-100/60 border border-turquesa-700/30 p-4 space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <h2 class="text-base font-bold text-marino-900">📷 Escáner rápido de código de barras (EAN)</h2>
+      <button type="button" id="btn-abrir-escaner-ean" class="btn-primario !py-1.5 !px-3 text-xs">Abrir cámara</button>
+    </div>
+    <div id="panel-video-ean" class="hidden space-y-2">
+      <video id="video-escaner-ean" class="w-full max-h-56 rounded-xl bg-black" playsinline muted></video>
+      <button type="button" id="btn-cerrar-escaner-ean" class="btn-secundario !py-1 !px-3 text-xs">Cerrar cámara</button>
+    </div>
+    <div class="flex gap-2">
+      <input id="input-codigo-ean" type="text" inputmode="numeric" placeholder="O escribe el código EAN (ej: 7801000100001)" aria-label="Código de barras EAN" class="campo-entrada !py-2 text-sm flex-1">
+      <button type="button" id="btn-buscar-ean" class="btn-secundario !py-2 !px-4 text-sm shrink-0">Buscar EAN</button>
+    </div>
+    <p id="estado-escaner-ean" aria-live="polite" class="text-xs font-bold text-marino-900"></p>
+  </section>
+
+  {% if form.non_field_errors %}
+    <div role="alert" class="rounded-xl bg-rojo-100 border-2 border-rojo-600 text-rojo-600 p-4 font-bold">
+      {% for err in form.non_field_errors %}<p>✘ {{ err }}</p>{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+      {% include "componentes/campo.html" with field=field %}
+    {% endfor %}
+    <div class="flex flex-wrap gap-3 pt-2">
+      <button type="submit" class="btn-primario flex-1">Guardar precio</button>
+      <a href="{% url 'precios:mis_precios' %}" class="btn-secundario">Ver historial</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script src="{% static 'js/escaner-ean.js' %}" defer></script>
+{% endblock %}

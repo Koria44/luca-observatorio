@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block titulo %}Registro de auditoría — Luca{% endblock %}
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-3xl">Registro de auditoría (solo lectura)</h1>
+      <p class="text-gris-700">Bitácora inmutable de creaciones, modificaciones, aprobaciones, rechazos y accesos (# REQ-15).</p>
+    </div>
+    <a href="?accion={{ filtros.accion }}&modelo={{ filtros.modelo }}&usuario={{ filtros.usuario }}&desde={{ filtros.desde }}&exportar=csv" class="btn-secundario">⬇ Exportar CSV</a>
+  </div>
+
+  <form method="get" class="tarjeta-luca grid grid-cols-1 sm:grid-cols-5 gap-3">
+    <select name="accion" aria-label="Filtrar por acción" class="campo-entrada">
+      <option value="">Todas las acciones</option>
+      {% for cod, etiq in acciones %}
+        <option value="{{ cod }}" {% if filtros.accion == cod %}selected{% endif %}>{{ etiq }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="modelo" value="{{ filtros.modelo }}" placeholder="Modelo (ej. Precio)" aria-label="Modelo" class="campo-entrada">
+    <input type="text" name="usuario" value="{{ filtros.usuario }}" placeholder="Correo usuario" aria-label="Correo usuario" class="campo-entrada">
+    <input type="date" name="desde" value="{{ filtros.desde }}" aria-label="Desde fecha" class="campo-entrada">
+    <button type="submit" class="btn-primario">Filtrar</button>
+  </form>
+
+  <div class="space-y-3">
+    {% for r in registros %}
+      <article class="tarjeta-luca space-y-2 text-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full font-bold bg-marino-100 text-marino-900">{{ r.get_accion_display }}</span>
+            <strong class="text-marino-900">{{ r.modelo }} #{{ r.objeto_id|default:"—" }}</strong>
+            <span class="text-gris-700">por {{ r.usuario.email|default:"Sistema" }}</span>
+          </div>
+          <time class="text-gris-700">{{ r.fecha|date:"d/m/Y H:i:s" }} · IP {{ r.ip|default:"—" }}</time>
+        </div>
+        {% if r.valores_anteriores or r.valores_nuevos %}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+            <div class="bg-rojo-100/60 rounded-xl p-3 border border-rojo-600/20">
+              <p class="font-bold text-rojo-600 text-xs mb-1">Valores anteriores</p>
+              <pre class="text-xs whitespace-pre-wrap break-all">{{ r.valores_anteriores }}</pre>
+            </div>
+            <div class="bg-verde-100/60 rounded-xl p-3 border border-verde-700/20">
+              <p class="font-bold text-verde-700 text-xs mb-1">Valores nuevos</p>
+              <pre class="text-xs whitespace-pre-wrap break-all">{{ r.valores_nuevos }}</pre>
+            </div>
+          </div>
+        {% endif %}
+      </article>
+    {% empty %}
+      <div class="tarjeta-luca text-center text-gris-700">No hay eventos de auditoría que coincidan con el filtro.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

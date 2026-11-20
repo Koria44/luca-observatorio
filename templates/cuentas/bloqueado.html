@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Acceso temporalmente bloqueado — Luca{% endblock %}
+
+{% block contenido %}
+<div class="max-w-lg mx-auto tarjeta-luca text-center space-y-4">
+  <img src="{% static 'img/marca/mascota-lucas-dormido.svg' %}" alt="Lucas indicando pausa de seguridad" class="w-32 h-auto mx-auto">
+  <h1 class="text-3xl">Demasiados intentos seguidos</h1>
+  <p class="text-gris-700">
+    Por seguridad bloqueamos temporalmente el acceso tras varios intentos fallidos. Espera <strong>15 minutos</strong> y vuelve a intentarlo, o recupera tu contraseña.
+  </p>
+  <div class="flex flex-wrap justify-center gap-3 pt-2">
+    <a href="{% url 'cuentas:recuperar' %}" class="btn-primario">Recuperar contraseña</a>
+    <a href="{% url 'portal:inicio' %}" class="btn-secundario">Volver al inicio</a>
+  </div>
+</div>
+{% endblock %}

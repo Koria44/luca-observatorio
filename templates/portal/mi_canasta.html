@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Mi Lista de Compras — Luca{% endblock %}
+
+{% block contenido %}
+<div id="app-mi-canasta"
+  data-items-iniciales="{{ items_iniciales_json }}"
+  data-lucas-pulgar="{% static 'img/marca/mascota-lucas-pulgar.svg' %}"
+  data-lucas-buscando="{% static 'img/marca/mascota-lucas-buscando.svg' %}"
+  class="space-y-6">
+
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div class="space-y-1">
+      <span class="cinta-luca">Comparador privado de tu cuenta</span>
+      <h1 class="text-3xl sm:text-4xl">Mi Lista de Compras</h1>
+      <p class="text-pizarra-600">Compara producto por producto y arma la ruta que más ahorra, combinando uno o varios locales de Pedro Aguirre Cerda.</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      {% if user.is_authenticated %}
+        <a href="{% url 'portal:alertas_precio' %}" class="btn-acento !py-2 !px-4 text-sm">Mis alertas de precio</a>
+      {% endif %}
+      <a id="btn-compartir-canasta-wa" href="#" target="_blank" rel="noopener noreferrer" class="hidden btn-primario !py-2 !px-4 text-sm">Compartir ruta por WhatsApp</a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    {# Columna izquierda: Productos en la lista + ajustes de ruta #}
+    <section class="lg:col-span-5 space-y-5">
+      <div class="tarjeta-luca space-y-4">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="text-xl">Productos en tu lista</h2>
+          <button type="button" id="btn-vaciar-canasta" class="text-sm font-bold text-tomate-600 hover:underline">Vaciar lista</button>
+        </div>
+        <ul id="lista-items-canasta" class="space-y-2.5"></ul>
+
+        <div class="pt-4 border-t border-crema-200 space-y-2.5">
+          <p class="text-sm font-bold text-tinta-900">Agregar rápido de la canasta básica:</p>
+          <div class="flex flex-wrap gap-2">
+            {% for p in productos_sugeridos %}
+              <button
+                type="button"
+                data-agregar-rapido
+                data-producto-id="{{ p.id }}"
+                data-producto-nombre="{{ p.nombre_completo }}"
+                class="px-3 py-1.5 rounded-full bg-crema-50 border border-crema-200 hover:border-ahorro-600 hover:bg-ahorro-100/60 text-xs font-bold text-tinta-900 transition-colors"
+              >+ {{ p.nombre }} ({{ p.marca.nombre }})</button>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      {# Ajustes de ahorro mínimo y máximo de locales #}
+      <div class="tarjeta-luca space-y-3 bg-crema-50/60">
+        <h2 class="text-lg">Preferencias de tu ruta</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          <div>
+            <label for="sel-umbral-desvio" class="block font-bold text-tinta-900 mb-1">Ahorro mínimo por desvío</label>
+            <select id="sel-umbral-desvio" class="campo-entrada !py-2 text-sm">
+              <option value="0">$0 (siempre el más barato)</option>
+              <option value="300">$300 o más</option>
+              <option value="500" selected>$500 o más (recomendado)</option>
+              <option value="1000">$1.000 o más</option>
+            </select>
+          </div>
+          <div>
+            <label for="sel-max-locales" class="block font-bold text-tinta-900 mb-1">Máximo de locales recomendados</label>
+            <select id="sel-max-locales" class="campo-entrada !py-2 text-sm">
+              <option value="1">Solo 1 local</option>
+              <option value="2">Hasta 2 locales</option>
+              <option value="3" selected>Hasta 3 locales (recomendado)</option>
+              <option value="10">Sin límite (ahorro máximo)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {# Columna derecha: Escenarios de ruta + tarjetas por local + tabla comparativa #}
+    <section class="lg:col-span-7 space-y-5">
+      <div id="resultado-optimizacion-canasta" aria-live="polite" class="space-y-5"></div>
+    </section>
+  </div>
+</div>
+{% endblock %}

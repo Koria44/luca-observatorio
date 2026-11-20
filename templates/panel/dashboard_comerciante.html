@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load humanize static %}
+{% block titulo %}Panel Comerciante — Luca{% endblock %}
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div class="space-y-1">
+      <span class="cinta-luca">Panel de comercio local</span>
+      <h1 class="text-3xl sm:text-4xl">Mi comercio en Luca</h1>
+      <p class="text-pizarra-600">Gestiona tus sucursales, precios vigentes, ofertas y carga masiva.</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'precios:registrar' %}" class="btn-primario">+ Publicar precio</a>
+      <a href="/precios/carga-masiva/" class="btn-acento">⬆ Carga masiva</a>
+      <a href="{% url 'comercios:mis_sucursales' %}" class="btn-secundario">Mis sucursales</a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="rounded-tarjeta bg-tinte-menta border border-ahorro-600/20 shadow-luca p-5"><p class="text-xs font-bold uppercase tracking-wide text-ahorro-700">Precios publicados</p><p class="text-4xl precio-destacado text-ahorro-700">{{ resumen.vigentes }}</p></div>
+    <div class="rounded-tarjeta bg-tinte-mantequilla border border-luca-400/50 shadow-luca p-5"><p class="text-xs font-bold uppercase tracking-wide text-tinta-900">En revisión</p><p class="text-4xl precio-destacado text-tinta-900">{{ resumen.pendientes }}</p></div>
+    <div class="rounded-tarjeta bg-tinte-durazno border border-tomate-600/20 shadow-luca p-5"><p class="text-xs font-bold uppercase tracking-wide text-tomate-600">Rechazados</p><p class="text-4xl precio-destacado text-tomate-600">{{ resumen.rechazados }}</p></div>
+  </div>
+
+  {# Sección "Mi imagen / Logo del comercio" (# Prompt 5 Sección 3.4) #}
+  {% for com in user.comercios.all %}
+    <section class="tarjeta-luca flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        {% if com.url_logo_publico %}
+          <img src="{{ com.url_logo_publico }}" alt="Logo de {{ com.nombre_fantasia }}" width="64" height="64" class="w-16 h-16 rounded-2xl object-contain border border-crema-200 bg-white">
+        {% else %}
+          <span class="w-16 h-16 rounded-2xl inline-flex items-center justify-center text-white font-titulo font-extrabold text-xl {{ com.clase_color_monograma }}">{{ com.iniciales_monograma }}</span>
+        {% endif %}
+        <div>
+          <h2 class="text-xl">Logo de {{ com.nombre_fantasia }}</h2>
+          <p class="text-sm text-pizarra-600">Estado: <strong class="text-tinta-900">{{ com.get_logo_estado_display }}</strong>{% if com.logo_motivo_rechazo %} · <span class="text-rojo-600 font-bold">{{ com.logo_motivo_rechazo }}</span>{% endif %}</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a href="{% url 'comercios:subir_logo' com.id %}" class="btn-secundario !py-2 !px-4 text-sm">Subir o cambiar logo</a>
+        <a href="{% url 'reportes:afiche_qr' com.id %}" class="btn-acento !py-2 !px-4 text-sm">Descargar afiche QR (PDF)</a>
+      </div>
+    </section>
+  {% endfor %}
+
+  {# Aviso de precios por vencer o desactualizados + Confirmar vigencia 1 clic #}
+  {% if resumen.por_vencer or resumen.desactualizados %}
+    <section class="tarjeta-luca border-l-4 border-luca-500 bg-tinte-mantequilla/40 space-y-3">
+      <h2 class="text-xl text-tinta-900">Precios por vencer o que requieren confirmación</h2>
+      {% for p in resumen.por_vencer %}
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-crema-200 pb-2 text-sm">
+          <span><strong>{{ p.producto.nombre_completo }}</strong> · Oferta vence el {{ p.vigencia_hasta|date:"d/m/Y" }}</span>
+          <form method="post" action="{% url 'precios:confirmar_vigencia' p.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-primario !py-1.5 !px-3.5 text-xs">✔ Confirmar vigente hoy</button>
+          </form>
+        </div>
+      {% endfor %}
+      {% for p in resumen.desactualizados %}
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-crema-200 pb-2 text-sm">
+          <span><strong>{{ p.producto.nombre_completo }}</strong> · Última actualización: {{ p.fecha_observacion|date:"d/m/Y" }}</span>
+          <form method="post" action="{% url 'precios:confirmar_vigencia' p.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-primario !py-1.5 !px-3.5 text-xs">✔ Confirmar vigente hoy</button>
+          </form>
+        </div>
+      {% endfor %}
+    </section>
+  {% endif %}
+
+  {# Comparativa privada vs. promedio comunal (anónima) #}
+  {% if resumen.comparativa_privada %}
+    <section class="tarjeta-luca space-y-3">
+      <div>
+        <h2 class="text-xl">¿Cómo estoy respecto al promedio de Pedro Aguirre Cerda?</h2>
+        <p class="text-xs text-pizarra-600">Comparativa privada y anónima de tus precios frente al promedio comunal.</p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="border-b-2 border-tinta-900"><th class="py-1.5 pr-3">Producto</th><th class="py-1.5 pr-3">Tu precio</th><th class="py-1.5 pr-3">Promedio PAC</th><th class="py-1.5">Posición</th></tr>
+          </thead>
+          <tbody>
+            {% for row in resumen.comparativa_privada %}
+              <tr class="border-b border-crema-200">
+                <td class="py-2 pr-3 font-bold">{{ row.precio.producto.nombre_completo }}</td>
+                <td class="py-2 pr-3 font-bold tabular-nums">${{ row.precio.precio_vigente|intcomma }}</td>
+                <td class="py-2 pr-3 tabular-nums">${{ row.promedio_comuna|intcomma }}</td>
+                <td class="py-2 font-bold {{ row.clase }}">{{ row.flecha }} {{ row.etiqueta }} ({{ row.diff_pct }}%)</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="tarjeta-luca space-y-3">
+    <h2 class="text-xl">Últimos precios registrados</h2>
+    {% for p in resumen.ultimos %}
+      <div class="border-b border-crema-200 pb-2.5 flex justify-between items-center text-sm">
+        <div>
+          <strong>{{ p.producto.nombre_completo }}</strong> · {{ p.sucursal.nombre }}
+          <span class="ml-2 px-2.5 py-0.5 rounded-full bg-crema-100 text-xs font-bold text-tinta-900">{{ p.get_estado_display }}</span>
+        </div>
+        <strong class="precio-destacado text-tinta-900 text-base">${{ p.precio_vigente|intcomma }}</strong>
+      </div>
+    {% empty %}
+      <div class="text-center py-6 space-y-2">
+        <img src="{% static 'img/marca/mascota-lucas-pulgar.svg' %}" alt="Lucas invitando a publicar tu primer precio" class="w-20 mx-auto">
+        <p class="text-pizarra-600 text-sm">Aún no registras precios. Usa el botón <strong>+ Publicar precio</strong> para aparecer en el comparador.</p>
+      </div>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

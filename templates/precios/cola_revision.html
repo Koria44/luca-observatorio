@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block titulo %}Cola de revisión de precios — Luca{% endblock %}
+{% block contenido %}
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl">Cola de validación de precios y ofertas</h1>
+    <p class="text-gris-700">Revisa precios enviados por comercios no verificados y alertas de variación atípica (> ±40 %) (# REQ-09).</p>
+  </div>
+
+  <div class="space-y-4">
+    {% for p in pendientes %}
+      <article class="tarjeta-luca space-y-3 {% if p.alerta_variacion %}border-2 border-rojo-600{% endif %}">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="space-y-1">
+            {% if p.alerta_variacion %}
+              <span class="inline-block px-3 py-0.5 rounded-full bg-rojo-100 text-rojo-600 font-bold text-xs">⚠ ALERTA VARIACIÓN ATÍPICA: {{ p.variacion_porcentual }}%</span>
+            {% endif %}
+            <h2 class="text-xl">{{ p.producto.nombre_completo }}</h2>
+            <p class="text-sm text-gris-700">{{ p.sucursal.nombre_visible }} ({{ p.sucursal.sector }}) · Fuente: {{ p.get_fuente_display }}</p>
+            <p class="text-sm">Normal: <strong>${{ p.precio_normal|intcomma }}</strong>{% if p.precio_oferta %} · Oferta: <strong class="text-coral-600">${{ p.precio_oferta|intcomma }}</strong>{% endif %}</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <form method="post" action="{% url 'precios:decidir' p.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="accion" value="aprobar">
+              <button type="submit" class="btn-primario !py-2 !px-4 text-sm">✔ Aprobar</button>
+            </form>
+            <form method="post" action="{% url 'precios:decidir' p.pk %}" class="flex gap-2 items-center">
+              {% csrf_token %}
+              <input type="hidden" name="accion" value="rechazar">
+              <input type="text" name="motivo" required placeholder="Motivo rechazo" aria-label="Motivo rechazo" class="campo-entrada !py-2 text-sm w-44">
+              <button type="submit" class="btn-secundario !py-2 !px-3 text-sm text-rojo-600 border-rojo-600">Rechazar</button>
+            </form>
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <div class="tarjeta-luca text-center text-gris-700">✔ No hay precios pendientes de revisión.</div>
+    {% endfor %}
+  </div>
+
+  {# Reportes ciudadanos de precios distintos en sala #}
+  <section class="space-y-3 pt-4 border-t-2 border-gris-200">
+    <h2 class="text-2xl">⚠ Reportes ciudadanos en sala ({{ reportes_ciudadanos|length }})</h2>
+    {% for rep in reportes_ciudadanos %}
+      <article class="tarjeta-luca flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="space-y-1 text-sm">
+          <span class="px-2.5 py-0.5 rounded-full bg-ambar-100 text-marino-900 font-bold text-xs">{{ rep.get_motivo_display }}</span>
+          <p class="font-bold text-marino-900">{{ rep.precio.producto.nombre_completo }} @ {{ rep.precio.sucursal.nombre_visible }} (${{ rep.precio.precio_vigente|intcomma }})</p>
+          {% if rep.comentario %}<p class="text-gris-700">“{{ rep.comentario }}”</p>{% endif %}
+        </div>
+        <form method="post" action="{% url 'precios:atender_reporte' rep.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-primario !py-2 !px-4 text-sm">✔ Marcar atendido</button>
+        </form>
+      </article>
+    {% empty %}
+      <div class="tarjeta-luca text-sm text-gris-700">✔ Sin reportes ciudadanos pendientes.</div>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

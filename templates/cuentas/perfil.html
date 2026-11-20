@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titulo %}Mi perfil — Luca{% endblock %}
+
+{% block contenido %}
+<div class="max-w-xl mx-auto tarjeta-luca space-y-6">
+  <div class="space-y-1">
+    <h1 class="text-3xl">Mi perfil</h1>
+    <p class="text-gris-700">Rol: <strong>{{ user.get_rol_display }}</strong> · Estado: <strong>{{ user.get_estado_cuenta_display }}</strong></p>
+    <p class="text-sm text-gris-700">Correo: {{ user.email }} · RUT: {{ user.rut_formateado }}</p>
+  </div>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% include "componentes/campo.html" with field=form.nombres %}
+    {% include "componentes/campo.html" with field=form.apellidos %}
+    {% include "componentes/campo.html" with field=form.telefono %}
+    <button type="submit" class="btn-primario w-full">Guardar cambios</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block titulo %}Carga masiva de precios — Luca{% endblock %}
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-3xl">Carga masiva de precios (CSV / Excel)</h1>
+      <p class="text-gris-700">Sube hasta 2.000 filas (máx. 2 MB), revisa la vista previa e informe de errores por fila antes de confirmar (# REQ-10).</p>
+    </div>
+    <a href="{% url 'precios:plantilla_carga' %}" class="btn-secundario">⬇ Descargar plantilla CSV</a>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="tarjeta-luca space-y-4">
+    {% csrf_token %}
+    <input type="hidden" name="paso" value="validar">
+    <div>
+      <label for="id-archivo" class="block font-titulo font-bold text-marino-900 mb-1">Archivo de precios (.csv o .xlsx)</label>
+      <input id="id-archivo" type="file" name="archivo" accept=".csv,.xlsx" required class="campo-entrada">
+      <p class="text-sm text-gris-700 mt-1">Columnas obligatorias: <code>producto_id</code>, <code>sucursal_id</code>, <code>precio_normal</code>. Opcionales: <code>precio_oferta</code>, <code>vigencia_desde</code>, <code>vigencia_hasta</code>, <code>condiciones</code>.</p>
+    </div>
+    <button type="submit" class="btn-primario">1. Validar y ver vista previa</button>
+  </form>
+
+  {% if errores %}
+    <section class="tarjeta-luca border-2 border-rojo-600 space-y-3" role="alert">
+      <h2 class="text-xl text-rojo-600">✘ Informe de errores por fila ({{ errores|length }})</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead><tr class="border-b-2 border-rojo-600"><th class="py-1 pr-3">Fila</th><th class="py-1 pr-3">Columna</th><th class="py-1">Motivo</th></tr></thead>
+          <tbody>
+            {% for e in errores %}
+              <tr class="border-b border-gris-200"><td class="py-1 pr-3 font-bold">{{ e.fila }}</td><td class="py-1 pr-3"><code>{{ e.columna }}</code></td><td class="py-1 text-rojo-600">{{ e.mensaje }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  {% if vista_previa %}
+    <section class="tarjeta-luca border-2 border-verde-700 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="text-xl text-verde-700">✔ Vista previa de filas válidas ({{ vista_previa|length }})</h2>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="paso" value="confirmar">
+          <button type="submit" class="btn-acento">2. Confirmar e importar {{ vista_previa|length }} registro(s)</button>
+        </form>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead><tr class="border-b-2 border-marino-700"><th class="py-1 pr-3">Fila</th><th class="py-1 pr-3">Producto</th><th class="py-1 pr-3">Sucursal</th><th class="py-1 pr-3">Normal</th><th class="py-1">Oferta</th></tr></thead>
+          <tbody>
+            {% for v in vista_previa|slice:":30" %}
+              <tr class="border-b border-gris-200"><td class="py-1 pr-3">{{ v.fila }}</td><td class="py-1 pr-3 font-bold">{{ v.producto_nombre }}</td><td class="py-1 pr-3">{{ v.sucursal_nombre }}</td><td class="py-1 pr-3">${{ v.precio_normal|intcomma }}</td><td class="py-1">{% if v.precio_oferta %}${{ v.precio_oferta|intcomma }}{% else %}—{% endif %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="tarjeta-luca space-y-3">
+    <h2 class="text-xl">Historial de mis cargas masivas</h2>
+    {% for c in historial_cargas %}
+      <div class="border-b border-gris-200 pb-2 text-sm flex flex-wrap justify-between gap-2">
+        <span><strong>{{ c.nombre_archivo }}</strong> — {{ c.get_estado_display }}</span>
+        <span>OK: <strong class="text-verde-700">{{ c.filas_ok }}</strong> · Errores: <strong class="text-rojo-600">{{ c.filas_error }}</strong> · {{ c.creado_en|date:"d/m/Y H:i" }}</span>
+      </div>
+    {% empty %}
+      <p class="text-sm text-gris-700">Aún no has realizado cargas masivas.</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

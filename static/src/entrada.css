@@ -1,0 +1,338 @@
+/*
+ * Hoja de estilos fuente de Luca (Observatorio de Precios · Pedro Aguirre Cerda).
+ * Paleta A "Almacén de barrio" — amigable, cálida y con color semántico.
+ * Compilar en local con `npm run build:css` hacia `static/css/salida.css`.
+ * # REQ-11: Mobile-first (360 px) y objetivos táctiles >= 48 px.
+ * # REQ-12: Accesibilidad WCAG 2.1 AA (foco visible, alto contraste, reduced-motion).
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --escala-texto: 1;
+  }
+
+  html {
+    font-size: calc(18px * var(--escala-texto));
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-crema-50 text-tinta-900 font-sans antialiased leading-relaxed;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-titulo font-extrabold text-tinta-900 tracking-tight;
+  }
+
+  /* Foco visible de alto contraste para navegación por teclado (# REQ-12) */
+  :focus-visible {
+    outline: 3px solid #FFC53D;
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+}
+
+@layer components {
+  /* Botón de acción principal: Verde Ahorro (#0E7A55, contraste 5,34:1 con blanco) */
+  .btn-primario {
+    @apply inline-flex items-center justify-center gap-2 min-h-tactil px-6 py-3 rounded-full
+           bg-ahorro-600 text-white font-titulo font-bold text-base
+           hover:bg-ahorro-700 hover:shadow-luca active:scale-[0.98] transition-all shadow-luca-suave
+           disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  /* Botón institucional azul tinta (acciones de gestión / paneles) */
+  .btn-tinta {
+    @apply inline-flex items-center justify-center gap-2 min-h-tactil px-6 py-3 rounded-full
+           bg-tinta-900 text-white font-titulo font-bold text-base
+           hover:bg-tinta-700 hover:shadow-luca active:scale-[0.98] transition-all shadow-luca-suave;
+  }
+
+  /* Botón secundario cálido tipo píldora */
+  .btn-secundario {
+    @apply inline-flex items-center justify-center gap-2 min-h-tactil px-5 py-3 rounded-full
+           bg-white text-tinta-900 border-2 border-tinta-900/20 font-titulo font-bold text-base
+           hover:border-tinta-900 hover:bg-tinta-100/50 active:scale-[0.98] transition-all;
+  }
+
+  /* Botón acento dorado Luca (#FFC53D, contraste 9,01:1 con tinta-900) */
+  .btn-acento {
+    @apply inline-flex items-center justify-center gap-2 min-h-tactil px-6 py-3 rounded-full
+           bg-luca-400 text-tinta-900 font-titulo font-extrabold text-base
+           hover:bg-luca-500 hover:text-white hover:shadow-luca active:scale-[0.98] transition-all shadow-luca-suave;
+  }
+
+  /* Botón oferta / urgencia amable tomate (#C2410C, contraste 5,18:1 con blanco) */
+  .btn-tomate {
+    @apply inline-flex items-center justify-center gap-2 min-h-tactil px-5 py-3 rounded-full
+           bg-tomate-600 text-white font-titulo font-bold text-base
+           hover:bg-tomate-500 hover:shadow-luca active:scale-[0.98] transition-all shadow-luca-suave;
+  }
+
+  /* Tarjeta base con sombras suaves en capas y radios generosos */
+  .tarjeta-luca {
+    @apply bg-white rounded-tarjeta border border-crema-200/80 shadow-luca p-5 sm:p-6;
+  }
+
+  /* Variante interactiva con elevación sutil al pasar el cursor */
+  .tarjeta-interactiva {
+    @apply tarjeta-luca hover:-translate-y-0.5 hover:shadow-luca-hover hover:border-tinta-900/20 transition-all duration-200;
+  }
+
+  /* Cintas y badges con color semántico */
+  .cinta-mejor-precio {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full
+           bg-ahorro-600 text-white font-titulo font-extrabold text-xs tracking-wide shadow-sm;
+  }
+
+  .cinta-oferta {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full
+           bg-tomate-600 text-white font-titulo font-extrabold text-xs tracking-wide shadow-sm;
+  }
+
+  .cinta-luca {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full
+           bg-luca-100 text-tinta-900 font-titulo font-extrabold text-xs border border-luca-400/50;
+  }
+
+  .chip-filtro {
+    @apply min-h-tactil inline-flex items-center gap-1.5 px-4 py-2 rounded-full
+           font-titulo font-bold text-sm transition-all border-2;
+  }
+
+  .precio-destacado {
+    @apply font-titulo font-extrabold tabular-nums tracking-tight;
+  }
+
+  .campo-entrada {
+    @apply block w-full min-h-tactil px-4 py-2.5 rounded-2xl border-2 border-crema-200
+           bg-white text-tinta-900 text-base shadow-inner
+           focus:border-ahorro-600 focus:ring-2 focus:ring-luca-400/60 transition-colors;
+  }
+
+  .enlace-saltar {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50
+           focus:bg-luca-400 focus:text-tinta-900 focus:font-bold focus:px-4 focus:py-3 focus:rounded-full focus:shadow-lg;
+  }
+
+  /* Patrón sutil cálido para el hero principal */
+  .hero-luca {
+    background-image:
+      radial-gradient(circle at 92% 18%, rgba(255, 197, 61, 0.28) 0%, rgba(255, 197, 61, 0) 42%),
+      radial-gradient(circle at 8% 92%, rgba(14, 122, 85, 0.14) 0%, rgba(14, 122, 85, 0) 45%),
+      radial-gradient(rgba(27, 42, 74, 0.045) 1.5px, transparent 1.5px);
+    background-size: 100% 100%, 100% 100%, 24px 24px;
+  }
+}
+
+/* Indicador vivo para "Abierta hoy" y flotación amable para Lucas */
+@keyframes pulso-suave {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.65; }
+}
+
+@keyframes flotar-suave {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.punto-vivo {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  background-color: #0E7A55;
+  animation: pulso-suave 1.8s ease-in-out infinite;
+}
+
+.flotar-suave {
+  animation: flotar-suave 4s ease-in-out infinite;
+}
+
+/* Modo oscuro amigable activable desde la barra superior (# REQ-12) */
+html.modo-oscuro {
+  color-scheme: dark;
+}
+
+html.modo-oscuro body,
+html.modo-oscuro body.bg-crema-50 {
+  background-color: #0F172A !important;
+  color: #F1F5F9 !important;
+}
+
+html.modo-oscuro header,
+html.modo-oscuro nav[aria-label="Navegación móvil"] {
+  background-color: rgba(19, 30, 53, 0.96) !important;
+  border-color: #263554 !important;
+  color: #F1F5F9;
+}
+
+html.modo-oscuro footer {
+  background-color: #111B2E !important;
+  color: #F1F5F9 !important;
+  border-top-color: #FFC53D !important;
+}
+
+html.modo-oscuro .tarjeta-luca,
+html.modo-oscuro .tarjeta-interactiva {
+  background-color: #18243E !important;
+  border-color: #2A3B5E !important;
+  color: #F1F5F9;
+  box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.65);
+}
+
+html.modo-oscuro .hero-luca {
+  background-color: #18243E !important;
+  background-image:
+    radial-gradient(circle at 92% 18%, rgba(255, 197, 61, 0.16) 0%, rgba(255, 197, 61, 0) 45%),
+    radial-gradient(circle at 8% 92%, rgba(20, 150, 106, 0.18) 0%, rgba(20, 150, 106, 0) 48%),
+    radial-gradient(rgba(255, 255, 255, 0.05) 1.5px, transparent 1.5px);
+}
+
+html.modo-oscuro [data-carrusel] {
+  background-image: linear-gradient(135deg, #1E2D4D 0%, #15253B 55%, #12332A 100%) !important;
+  border-color: rgba(255, 197, 61, 0.45) !important;
+  color: #F8FAFC !important;
+}
+
+html.modo-oscuro .bg-white,
+html.modo-oscuro .bg-white\/95,
+html.modo-oscuro .bg-white\/85,
+html.modo-oscuro .bg-white\/80,
+html.modo-oscuro .bg-crema-50,
+html.modo-oscuro .bg-crema-50\/70,
+html.modo-oscuro .bg-crema-50\/60,
+html.modo-oscuro .bg-crema-100,
+html.modo-oscuro .bg-gris-100 {
+  background-color: #1E2C4A !important;
+  color: #F1F5F9;
+}
+
+html.modo-oscuro .bg-tinte-menta,
+html.modo-oscuro .bg-tinte-menta\/60,
+html.modo-oscuro .bg-tinte-menta\/40,
+html.modo-oscuro .bg-ahorro-100,
+html.modo-oscuro .bg-verde-100,
+html.modo-oscuro .bg-turquesa-100 {
+  background-color: rgba(14, 122, 85, 0.24) !important;
+  border-color: rgba(52, 211, 153, 0.35) !important;
+}
+
+html.modo-oscuro .bg-tinte-mantequilla,
+html.modo-oscuro .bg-tinte-mantequilla\/40,
+html.modo-oscuro .bg-luca-100,
+html.modo-oscuro .bg-ambar-100 {
+  background-color: rgba(255, 197, 61, 0.16) !important;
+  border-color: rgba(255, 197, 61, 0.38) !important;
+}
+
+html.modo-oscuro .bg-tinte-durazno,
+html.modo-oscuro .bg-tomate-100,
+html.modo-oscuro .bg-tomate-100\/50,
+html.modo-oscuro .bg-tomate-100\/40,
+html.modo-oscuro .bg-coral-100,
+html.modo-oscuro .bg-rojo-100 {
+  background-color: rgba(234, 88, 12, 0.20) !important;
+  border-color: rgba(251, 146, 60, 0.38) !important;
+}
+
+html.modo-oscuro .bg-tinte-cielo,
+html.modo-oscuro .bg-tinta-100,
+html.modo-oscuro .bg-marino-100,
+html.modo-oscuro .bg-azul-100 {
+  background-color: rgba(56, 114, 212, 0.22) !important;
+  border-color: rgba(147, 197, 253, 0.30) !important;
+}
+
+html.modo-oscuro .bg-tinte-lavanda {
+  background-color: rgba(139, 92, 246, 0.22) !important;
+  border-color: rgba(196, 181, 253, 0.30) !important;
+}
+
+html.modo-oscuro h1,
+html.modo-oscuro h2,
+html.modo-oscuro h3,
+html.modo-oscuro h4,
+html.modo-oscuro .text-tinta-900,
+html.modo-oscuro .text-tinta-700,
+html.modo-oscuro .text-marino-900,
+html.modo-oscuro .text-marino-700,
+html.modo-oscuro .text-gris-900 {
+  color: #F8FAFC !important;
+}
+
+html.modo-oscuro .text-pizarra-600,
+html.modo-oscuro .text-pizarra-500,
+html.modo-oscuro .text-gris-700,
+html.modo-oscuro .text-gris-500 {
+  color: #CBD5E1 !important;
+}
+
+html.modo-oscuro .text-ahorro-600,
+html.modo-oscuro .text-ahorro-700,
+html.modo-oscuro .text-verde-700,
+html.modo-oscuro .text-turquesa-700 {
+  color: #34D399 !important;
+}
+
+html.modo-oscuro .text-tomate-600,
+html.modo-oscuro .text-coral-600,
+html.modo-oscuro .text-rojo-600 {
+  color: #FB923C !important;
+}
+
+html.modo-oscuro .border-crema-200,
+html.modo-oscuro .border-crema-200\/80,
+html.modo-oscuro .border-gris-200 {
+  border-color: #2A3B5E !important;
+}
+
+html.modo-oscuro .campo-entrada,
+html.modo-oscuro input[type="search"],
+html.modo-oscuro input[type="text"],
+html.modo-oscuro input[type="email"],
+html.modo-oscuro input[type="password"],
+html.modo-oscuro input[type="number"],
+html.modo-oscuro select,
+html.modo-oscuro textarea {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+html.modo-oscuro .btn-secundario {
+  background-color: #1E2C4A !important;
+  color: #F8FAFC !important;
+  border-color: #475569 !important;
+}
+
+html.modo-oscuro .btn-secundario:hover {
+  background-color: #2A3B5E !important;
+  border-color: #FFC53D !important;
+}
+
+html.modo-oscuro .btn-acento {
+  background-color: #FFC53D !important;
+  color: #0F172A !important;
+}
+
+html.modo-oscuro header a img[src*="luca-horizontal"],
+html.modo-oscuro footer img[src*="luca-horizontal"] {
+  background-color: #FFF8EC;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.9rem;
+}
+
+/* Respeto estricto a prefers-reduced-motion (# REQ-12) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

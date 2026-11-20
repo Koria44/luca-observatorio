@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load humanize static %}
+{% block titulo %}Cobertura y Desiertos de Monitoreo DIDESE — Luca{% endblock %}
+
+{% block estilos_extra %}
+<link rel="stylesheet" href="{% static 'vendor/maplibre-gl/maplibre-gl.css' %}">
+{% endblock %}
+
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <span class="px-3 py-0.5 rounded-full bg-marino-100 text-marino-900 font-bold text-xs">Inteligencia Territorial DIDESE</span>
+      <h1 class="text-3xl mt-1">Cobertura por sector y desiertos de monitoreo</h1>
+      <p class="text-gris-700">Identifica sectores de Pedro Aguirre Cerda con baja cobertura (≤ 2 locales monitoreados) para priorizar nuevos catastros.</p>
+    </div>
+    <a href="{% url 'panel:admin' %}" class="btn-secundario !py-2 !px-4 text-sm">← Volver al Dashboard</a>
+  </div>
+
+  {% if desiertos_count > 0 %}
+    <div role="status" class="rounded-xl bg-ambar-100 border-2 border-ambar-500 p-4 font-bold text-marino-900">
+      ⚠ Se detectaron {{ desiertos_count }} sector(es) con cobertura baja (≤ 2 locales monitoreados).
+    </div>
+  {% endif %}
+
+  <section class="tarjeta-luca space-y-3">
+    <h2 class="text-xl">Detalle de cobertura territorial (tabla accesible)</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm border-collapse">
+        <thead>
+          <tr class="border-b-2 border-marino-700">
+            <th class="py-2 pr-3">Sector / Población</th>
+            <th class="py-2 pr-3">Locales activos</th>
+            <th class="py-2 pr-3">Productos monitoreados</th>
+            <th class="py-2 pr-3">Precio promedio (CLP)</th>
+            <th class="py-2">Estado de cobertura</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in sectores_stats %}
+            <tr class="border-b border-gris-200 {% if s.es_desierto %}bg-rojo-100/40{% endif %}">
+              <td class="py-2 pr-3 font-bold text-marino-900">{{ s.etiqueta }}</td>
+              <td class="py-2 pr-3 font-bold">{{ s.locales }}</td>
+              <td class="py-2 pr-3">{{ s.productos }}</td>
+              <td class="py-2 pr-3">${{ s.precio_promedio|intcomma }}</td>
+              <td class="py-2">
+                {% if s.es_desierto %}
+                  <span class="px-2.5 py-0.5 rounded-full bg-rojo-100 text-rojo-600 font-bold text-xs">⚠ Baja cobertura (desierto)</span>
+                {% else %}
+                  <span class="px-2.5 py-0.5 rounded-full bg-verde-100 text-verde-700 font-bold text-xs">✔ Cobertura adecuada</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

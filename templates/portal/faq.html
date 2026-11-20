@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}Preguntas frecuentes — Luca{% endblock %}
+{% block contenido %}
+<div class="max-w-3xl mx-auto space-y-4">
+  <h1 class="text-3xl">Preguntas frecuentes</h1>
+  <details class="tarjeta-luca" open>
+    <summary class="font-titulo font-extrabold text-xl cursor-pointer">¿Necesito crear cuenta para buscar precios?</summary>
+    <p class="mt-2 text-gris-700">No. Buscar productos, comparar precios, ver ofertas y usar el mapa es 100 % público y gratuito para cualquier vecino.</p>
+  </details>
+  <details class="tarjeta-luca">
+    <summary class="font-titulo font-extrabold text-xl cursor-pointer">¿Por qué muestran el precio por kilo o litro?</summary>
+    <p class="mt-2 text-gris-700">Porque muchas veces una bolsa de 500 g parece más barata que una de 1 kg, pero al calcular el valor por kilo resulta más cara. Así puedes comparar de forma justa.</p>
+  </details>
+  <details class="tarjeta-luca">
+    <summary class="font-titulo font-extrabold text-xl cursor-pointer">¿Cómo registro mi almacén o negocio?</summary>
+    <p class="mt-2 text-gris-700">Ingresa a <a href="{% url 'cuentas:registro_comerciante' %}" class="underline font-bold text-marino-700">Registrar mi comercio</a>. Un fiscalizador verificará tus datos y luego DIDESE activará tu cuenta.</p>
+  </details>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titulo %}Instrucciones enviadas — Luca{% endblock %}
+{% block contenido %}
+<div class="max-w-lg mx-auto tarjeta-luca space-y-4 text-center">
+  <h1 class="text-3xl">Revisa tu correo</h1>
+  <p class="text-gris-700">Si el correo ingresado corresponde a una cuenta registrada, te enviamos un enlace para restablecer tu contraseña.</p>
+  <a href="{% url 'cuentas:ingresar' %}" class="btn-primario">Volver a ingresar</a>
+</div>
+{% endblock %}
