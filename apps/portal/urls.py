@@ -22,4 +22,5 @@ urlpatterns = [
     path("preguntas-frecuentes/", views.vista_faq, name="faq"),
     path("contacto/", views.vista_contacto, name="contacto"),
     path("privacidad/", views.vista_privacidad, name="privacidad"),
+    path("guia-de-estilo/", views.vista_guia_estilo, name="guia_estilo"),
 ]

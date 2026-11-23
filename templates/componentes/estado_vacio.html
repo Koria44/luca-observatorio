@@ -1,0 +1,12 @@
+{% load static %}
+{# Estado vacío reutilizable con mascota Lucas y acción principal (# Sección 4) #}
+<div class="tarjeta-luca text-center space-y-3 py-10 bg-gradient-to-b from-white to-crema-50 {{ clase|default:'' }}">
+  <img src="{% static imagen|default:'img/marca/mascota-lucas-buscando.svg' %}" alt="{{ alt|default:'Lucas buscando resultados' }}" width="112" height="112" class="w-28 h-28 mx-auto object-contain motion-safe:animate-escalar sin-anim:animate-none">
+  <h2 class="text-2xl">{{ titulo }}</h2>
+  {% if descripcion %}<p class="text-pizarra-600 max-w-md mx-auto text-sm sm:text-base">{{ descripcion }}</p>{% endif %}
+  {% if cta_url and cta_texto %}
+    <div class="pt-1">
+      <a href="{{ cta_url }}" class="btn-primario">{{ cta_texto }}</a>
+    </div>
+  {% endif %}
+</div>

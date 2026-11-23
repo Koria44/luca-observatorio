@@ -31,7 +31,7 @@
           <h2 class="text-xl">Productos en tu lista</h2>
           <button type="button" id="btn-vaciar-canasta" class="text-sm font-bold text-tomate-600 hover:underline">Vaciar lista</button>
         </div>
-        <ul id="lista-items-canasta" class="space-y-2.5"></ul>
+        <ul id="lista-items-canasta" class="space-y-2.5" data-auto-animar></ul>
 
         <div class="pt-4 border-t border-crema-200 space-y-2.5">
           <p class="text-sm font-bold text-tinta-900">Agregar rápido de la canasta básica:</p>
@@ -42,7 +42,7 @@
                 data-agregar-rapido
                 data-producto-id="{{ p.id }}"
                 data-producto-nombre="{{ p.nombre_completo }}"
-                class="px-3 py-1.5 rounded-full bg-crema-50 border border-crema-200 hover:border-ahorro-600 hover:bg-ahorro-100/60 text-xs font-bold text-tinta-900 transition-colors"
+                class="min-h-tactil px-3.5 py-2 rounded-full bg-crema-50 border border-crema-200 hover:border-ahorro-600 hover:bg-ahorro-100/60 text-xs font-bold text-tinta-900 transition-colors"
               >+ {{ p.nombre }} ({{ p.marca.nombre }})</button>
             {% endfor %}
           </div>

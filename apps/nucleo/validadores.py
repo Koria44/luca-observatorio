@@ -209,3 +209,99 @@ def distancia_haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -
     a = math.sin(dphi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0) ** 2
     c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
     return round(radio_tierra_km * c, 2)
+
+
+# --- Validadores avanzados de gobernanza (# Prompt 7 Sección 5) ---
+
+DOMINIOS_DESECHABLES = frozenset({
+    "mailinator.com", "guerrillamail.com", "tempmail.com", "10minutemail.com",
+    "yopmail.com", "throwaway.email", "sharklasers.com", "trashmail.com",
+})
+
+
+def es_dominio_desechable(correo: str) -> bool:
+    """True si el correo pertenece a un dominio temporal/desechable conocido (# Sección 5.1)."""
+    if not correo or "@" not in correo:
+        return False
+    return correo.strip().lower().rsplit("@", 1)[-1] in DOMINIOS_DESECHABLES
+
+
+def validar_ean(codigo: str) -> str:
+    """Valida EAN-8, EAN-12 (UPC-A), EAN-13 o EAN-14 verificando su dígito de control GS1 (# Sección 5.6)."""
+    limpio = re.sub(r"[\s\-]", "", str(codigo or "").strip())
+    if len(limpio) not in (8, 12, 13, 14) or not limpio.isdigit():
+        raise ValidationError("El código de barras debe ser EAN-8, EAN-12, EAN-13 o EAN-14 numérico.")
+    digitos = [int(d) for d in limpio]
+    check = digitos[-1]
+    cuerpo = digitos[:-1]
+    # Regla GS1: desde la derecha del cuerpo, posiciones impares ×3 y pares ×1
+    suma = sum(d * (3 if i % 2 == 0 else 1) for i, d in enumerate(reversed(cuerpo)))
+    esperado = (10 - (suma % 10)) % 10
+    if check != esperado:
+        raise ValidationError("El dígito verificador del código de barras EAN no es válido.")
+    return limpio
+
+
+def normalizar_precio_entrada(valor) -> int:
+    """
+    Normaliza entradas CLP como '1.990', '$1990' o '1 990' a entero positivo.
+    Rechaza formatos ambiguos con coma decimal/miles como '1,990' (# Sección 5.4).
+    """
+    if isinstance(valor, bool):
+        raise ValidationError("El precio debe ser un número entero en pesos chilenos.")
+    if isinstance(valor, int):
+        validar_precio_clp(valor)
+        return valor
+    txt = str(valor or "").strip()
+    if "," in txt:
+        raise ValidationError("Formato de precio ambiguo (no uses comas como '1,990'; escribe '1990' o '1.990').")
+    limpio = re.sub(r"[\$\s.]", "", txt)
+    if not limpio.isdigit():
+        raise ValidationError("Ingresa un precio entero en pesos chilenos (ejemplo: 1990 o 1.990).")
+    monto = int(limpio)
+    validar_precio_clp(monto)
+    return monto
+
+
+def detectar_atipico_mad(valor: float, muestras: list[float], umbral_z: float = 3.0) -> str | None:
+    """
+    Detección estadística robusta con Mediana y MAD (# Sección 5.4).
+    Devuelve 'POSIBLE_CEBO' si es anormalmente bajo, 'POSIBLE_ERROR_ALTO' si es anormalmente alto, o None.
+    """
+    from statistics import median
+
+    validas = [float(x) for x in muestras if x and float(x) > 0]
+    if len(validas) < 3:
+        return None
+    med = median(validas)
+    desv = [abs(x - med) for x in validas]
+    mad = median(desv)
+    if mad == 0:
+        if float(valor) < med * 0.55:
+            return "POSIBLE_CEBO"
+        if float(valor) > med * 1.8:
+            return "POSIBLE_ERROR_ALTO"
+        return None
+    z_mod = 0.6745 * (float(valor) - med) / mad
+    if z_mod <= -umbral_z:
+        return "POSIBLE_CEBO"
+    if z_mod >= umbral_z:
+        return "POSIBLE_ERROR_ALTO"
+    return None
+
+
+def validar_url_next_segura(url: str) -> str:
+    """# SEGURIDAD: Permite solo rutas internas relativas (previene Open Redirect en `next`)."""
+    limpio = (url or "").strip()
+    if not limpio or not limpio.startswith("/") or limpio.startswith("//") or "\\" in limpio:
+        return "/"
+    return limpio
+
+
+def normalizar_texto_nfc(texto: str) -> str:
+    """Normaliza a Unicode NFC y elimina caracteres de control invisibles (# Sección 5.8)."""
+    import unicodedata
+
+    norm = unicodedata.normalize("NFC", str(texto or ""))
+    return "".join(ch for ch in norm if unicodedata.category(ch)[0] != "C" or ch in ("\n", "\t")).strip()
+

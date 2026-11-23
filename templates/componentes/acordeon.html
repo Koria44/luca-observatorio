@@ -1,0 +1,23 @@
+{# Acordeón accesible sin animar height (grid-template-rows) (# Sección 1 / 4 / REQ-12) #}
+<div class="rounded-2xl bg-white border border-crema-200 shadow-nivel-1 overflow-hidden {{ clase|default:'' }}">
+  <button
+    type="button"
+    data-acordeon-btn
+    aria-expanded="{% if abierto %}true{% else %}false{% endif %}"
+    aria-controls="panel-{{ id }}"
+    id="btn-{{ id }}"
+    class="w-full min-h-tactil px-5 py-3.5 flex items-center justify-between gap-3 text-left font-titulo font-extrabold text-tinta-900 hover:bg-crema-50 transition-colors"
+  >
+    <span>{{ titulo }}</span>
+    <span class="acordeon-icono transition-transform duration-200 ease-salida-suave shrink-0">
+      {% include "componentes/icono.html" with nombre="chevron-down" clase="w-5 h-5 text-pizarra-600" %}
+    </span>
+  </button>
+  <div id="panel-{{ id }}" role="region" aria-labelledby="btn-{{ id }}" class="acordeon-panel">
+    <div>
+      <div class="px-5 pb-4 pt-1 text-sm sm:text-base text-pizarra-600 border-t border-crema-200/70">
+        {{ contenido }}
+      </div>
+    </div>
+  </div>
+</div>

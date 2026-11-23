@@ -252,6 +252,36 @@ class Command(BaseCommand):
 
         # 5. Banners accesibles (6 ejemplos)
         self._crear_banners_demo(productos_con_ref)
+        self._poblar_gobernanza_y_genericos(usuarios_creados, sucursales)
+
+    def _poblar_gobernanza_y_genericos(self, usuarios_creados, sucursales):
+        """Crea habilitaciones, sincroniza grupos de 5 roles y productos genéricos (# Prompt 7 y 8)."""
+        from apps.catalogo.genericos import poblar_genericos_desde_catalogo
+        from apps.gobernanza.models import Habilitacion
+        from apps.nucleo.permisos_catalogo import sincronizar_grupos_django
+
+        sincronizar_grupos_django()
+        admin_user = usuarios_creados["admin"]
+        hoy = timezone.localdate()
+        vistos = set()
+        for suc in sucursales:
+            com = suc.comercio
+            if com.id in vistos:
+                continue
+            vistos.add(com.id)
+            if com.estado == Comercio.Estado.ACTIVO and not Habilitacion.objects.filter(comercio=com).exists():
+                nivel = Habilitacion.Nivel.CONFIABLE if com.comercio_confiable else Habilitacion.Nivel.SUPERVISADO
+                Habilitacion.objects.create(
+                    comercio=com,
+                    nivel=nivel,
+                    estado=Habilitacion.Estado.OTORGADA,
+                    otorgada_por=admin_user,
+                    fecha_otorgamiento=timezone.now(),
+                    vigente_hasta=hoy + timedelta(days=365),
+                    motivo="Habilitación inicial de demostración",
+                    checklist={"datos_coinciden": True, "documentos_legibles": True},
+                )
+        poblar_genericos_desde_catalogo()
 
         self.stdout.write(
             self.style.SUCCESS(
@@ -266,6 +296,7 @@ class Command(BaseCommand):
         )
 
     def _crear_usuarios_demo(self) -> dict:
+        pw_super = os.environ.get("DEMO_PASSWORD_SUPERADMIN", "LucaSuper2026!")
         pw_admin = os.environ.get("DEMO_PASSWORD_ADMIN", "LucaAdmin2026!")
         pw_fisc = os.environ.get("DEMO_PASSWORD_FISCALIZADOR", "LucaFiscal2026!")
         pw_com = os.environ.get("DEMO_PASSWORD_COMERCIANTE", "LucaComercio2026!")
@@ -289,8 +320,16 @@ class Command(BaseCommand):
                 u.save(update_fields=["password"])
             return u
 
+        superadmin = asegurar_usuario(
+            "superadmin@luca-pac.cl", pw_super, "Equipo", "Seguridad PAC", 13100001, "+56910000001",
+            Usuario.Rol.SUPERADMIN, Usuario.EstadoCuenta.ACTIVA, is_staff=True, is_superuser=True
+        )
         admin = asegurar_usuario(
             "admin.didese@luca-pac.cl", pw_admin, "Carolina", "Méndez", 14200100, "+56910001001",
+            Usuario.Rol.ADMIN, Usuario.EstadoCuenta.ACTIVA, is_staff=True
+        )
+        admin2 = asegurar_usuario(
+            "admin2.didese@luca-pac.cl", pw_admin, "Patricio", "Araya", 14200102, "+56910001002",
             Usuario.Rol.ADMIN, Usuario.EstadoCuenta.ACTIVA, is_staff=True
         )
         fisc1 = asegurar_usuario(
@@ -346,7 +385,9 @@ class Command(BaseCommand):
             )
 
         return {
+            "superadmin": superadmin,
             "admin": admin,
+            "admin2": admin2,
             "fiscalizadores": [fisc1, fisc2],
             "comerciantes_activos": comerciantes_activos,
         }

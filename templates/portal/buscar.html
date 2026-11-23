@@ -6,47 +6,47 @@
 <div class="space-y-6">
   <div class="flex flex-wrap items-end justify-between gap-3">
     <div class="space-y-1">
-      <span class="cinta-luca">Comparador comunal · PAC</span>
-      <h1 class="text-3xl sm:text-4xl">Buscar y comparar productos</h1>
+      {% include "componentes/insignia.html" with tipo="luca" texto="Comparador comunal · PAC" icono="search" %}
+      <h1 class="text-fluido-h1">Buscar y comparar productos</h1>
       <p class="text-pizarra-600">Encuentra el mejor precio vigente y compara por kilo, litro o unidad.</p>
     </div>
-    <p class="font-titulo font-extrabold text-tinta-900 bg-white px-4 py-2 rounded-full border border-crema-200 shadow-luca-suave text-sm">
+    <p class="font-titulo font-extrabold text-tinta-900 bg-white px-4 py-2 rounded-full border border-crema-200 shadow-nivel-1 text-sm">
       {{ total_resultados }} producto{{ total_resultados|pluralize }} encontrado{{ total_resultados|pluralize }}
     </p>
   </div>
 
   <form method="get" class="tarjeta-luca grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
-    <div class="lg:col-span-2">
+    <div class="lg:col-span-2 min-w-0">
       <label for="id-q" class="block text-sm font-bold text-tinta-900 mb-1">Producto o marca</label>
-      <input id="id-q" type="search" name="q" value="{{ q }}" placeholder="Ej: arroz, palta, porotos, fideos..." class="campo-entrada">
+      <input id="id-q" type="search" name="q" value="{{ q }}" placeholder="Ej: arroz, palta, porotos, fideos..." class="campo-entrada max-w-full">
     </div>
-    <div>
+    <div class="min-w-0">
       <label for="id-cat" class="block text-sm font-bold text-tinta-900 mb-1">Categoría</label>
-      <select id="id-cat" name="categoria" class="campo-entrada">
+      <select id="id-cat" name="categoria" class="campo-entrada max-w-full">
         <option value="">Todas</option>
         {% for c in categorias %}
           <option value="{{ c.slug }}" {% if cat_slug == c.slug %}selected{% endif %}>{{ c.icono }} {{ c.nombre }}</option>
         {% endfor %}
       </select>
     </div>
-    <div>
+    <div class="min-w-0">
       <label for="id-orden" class="block text-sm font-bold text-tinta-900 mb-1">Ordenar por</label>
-      <select id="id-orden" name="orden" class="campo-entrada">
+      <select id="id-orden" name="orden" class="campo-entrada max-w-full">
         <option value="precio_unidad" {% if orden == "precio_unidad" %}selected{% endif %}>Menor precio por unidad (kg/L/un)</option>
         <option value="precio" {% if orden == "precio" %}selected{% endif %}>Menor precio total</option>
         <option value="vigencia" {% if orden == "vigencia" %}selected{% endif %}>Más reciente</option>
       </select>
     </div>
-    <button type="submit" class="btn-primario">Buscar</button>
+    <button type="submit" class="btn-primario w-full">Buscar</button>
 
     <div class="sm:col-span-2 lg:col-span-5 flex flex-wrap items-center gap-4 pt-2 border-t border-crema-200 text-sm">
-      <label class="inline-flex items-center gap-2 font-bold text-tinta-900 cursor-pointer">
-        <input type="checkbox" name="canasta" value="1" {% if solo_canasta %}checked{% endif %} class="w-5 h-5 accent-ahorro-600 rounded">
+      <label class="min-h-tactil inline-flex items-center gap-2 font-bold text-tinta-900 cursor-pointer">
+        <input type="checkbox" name="canasta" value="1" {% if solo_canasta %}checked{% endif %} class="form-checkbox w-5 h-5 rounded text-ahorro-600">
         Solo canasta básica
       </label>
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2 max-w-full min-w-0">
         <label for="id-sector" class="font-bold text-tinta-900">Sector:</label>
-        <select id="id-sector" name="sector" class="rounded-full border-2 border-crema-200 px-3.5 py-1.5 bg-white font-semibold text-tinta-900">
+        <select id="id-sector" name="sector" class="min-h-tactil rounded-full border-2 border-crema-200 px-3.5 py-2 bg-white font-semibold text-tinta-900 max-w-full">
           <option value="">Toda la comuna</option>
           {% for val, etiq in sectores %}
             <option value="{{ val }}" {% if sector == val %}selected{% endif %}>{{ etiq }}</option>
@@ -56,19 +56,19 @@
     </div>
   </form>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-auto-animar>
     {% for r in resultados %}
       {% with img=r.producto.imagen_por_defecto %}
-      <article class="tarjeta-interactiva flex flex-col justify-between gap-4">
-        <div class="flex items-start gap-3.5">
-          <img src="{{ img.url_miniatura }}" alt="{{ img.alt }}" width="84" height="84" loading="lazy" class="w-20 h-20 rounded-2xl object-contain bg-crema-50 border border-crema-200 p-1.5 shrink-0">
+      <article class="tarjeta-interactiva flex flex-col justify-between gap-4 min-w-0 overflow-hidden">
+        <div class="flex items-start gap-3.5 min-w-0">
+          <img src="{{ img.url_miniatura }}" alt="{{ img.alt }}" width="80" height="80" loading="lazy" class="img-blur-up w-20 h-20 rounded-2xl object-contain bg-crema-50 border border-crema-200 p-1.5 shrink-0">
           <div class="space-y-1.5 flex-1 min-w-0">
             <div class="flex flex-wrap items-center gap-1.5">
               <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-tinte-cielo text-tinta-900">{{ r.producto.categoria.icono }} {{ r.producto.categoria.nombre }}</span>
               {% if r.producto.es_canasta_basica %}<span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-luca-100 text-tinta-900">Canasta básica</span>{% endif %}
             </div>
-            <h2 class="text-xl leading-snug"><a href="{% url 'portal:comparar' r.producto.id %}" class="hover:text-ahorro-600 transition-colors">{{ r.producto.nombre_completo }}</a></h2>
-            <p class="text-sm text-pizarra-600">
+            <h2 class="text-xl leading-snug break-words"><a href="{% url 'portal:comparar' r.producto.id %}" class="hover:text-ahorro-600 transition-colors">{{ r.producto.nombre_completo }}</a></h2>
+            <p class="text-sm text-pizarra-600 break-words">
               Desde <strong class="text-tinta-900">{{ r.mejor_precio.sucursal.nombre_visible }}</strong> ({{ r.mejor_precio.sucursal.sector }}) · {{ r.cantidad_locales }} local{{ r.cantidad_locales|pluralize:"es" }}
             </p>
             {% if r.ahorro_potencial > 0 %}
@@ -76,7 +76,7 @@
             {% endif %}
           </div>
         </div>
-        <div class="pt-3 border-t border-crema-200 flex items-end justify-between gap-3">
+        <div class="pt-3 border-t border-crema-200 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p class="text-xs font-bold uppercase tracking-wide text-ahorro-700">Mejor precio hoy</p>
             <p class="text-3xl precio-destacado text-ahorro-600">${{ r.precio_min|intcomma }}</p>
@@ -84,19 +84,17 @@
           </div>
           <div class="flex flex-wrap gap-2">
             {% if user.is_authenticated and user.rol == "VECINO" %}
-              <button type="button" data-agregar-canasta data-producto-id="{{ r.producto.id }}" data-producto-nombre="{{ r.producto.nombre_completo }}" class="btn-acento !py-2 !px-3.5 text-sm">+ Mi lista</button>
+              <button type="button" data-agregar-canasta data-producto-id="{{ r.producto.id }}" data-producto-nombre="{{ r.producto.nombre_completo }}" class="btn-acento !px-4 text-sm">+ Mi lista</button>
             {% endif %}
-            <a href="{% url 'portal:comparar' r.producto.id %}" class="btn-primario !py-2.5 !px-5 text-sm">Comparar →</a>
+            <a href="{% url 'portal:comparar' r.producto.id %}" class="btn-primario !px-5 text-sm">Comparar {% include "componentes/icono.html" with nombre="arrow-right" clase="w-4 h-4" %}</a>
           </div>
         </div>
       </article>
       {% endwith %}
     {% empty %}
-      <div class="md:col-span-2 tarjeta-luca text-center space-y-3 py-12 bg-gradient-to-b from-white to-crema-50">
-        <img src="{% static 'img/marca/mascota-lucas-buscando.svg' %}" alt="Lucas buscando resultados" class="w-32 mx-auto flotar-suave">
-        <h2 class="text-2xl">Lucas no encontró productos con ese filtro</h2>
-        <p class="text-pizarra-600 max-w-md mx-auto">Prueba con palabras más simples como "arroz", "leche", "palta" o quita algunos filtros.</p>
-        <a href="{% url 'portal:buscar' %}" class="btn-primario">Ver todos los productos</a>
+      <div class="md:col-span-2">
+        {% url 'portal:buscar' as url_buscar %}
+        {% include "componentes/estado_vacio.html" with titulo="Lucas no encontró productos con ese filtro" descripcion="Prueba con palabras más simples como arroz, leche o palta, o quita algunos filtros." cta_url=url_buscar cta_texto="Ver todos los productos" %}
       </div>
     {% endfor %}
   </div>

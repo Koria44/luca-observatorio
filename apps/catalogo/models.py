@@ -54,6 +54,58 @@ class Marca(models.Model):
         return self.nombre
 
 
+class ProductoGenerico(models.Model):
+    """
+    Ficha canónica sin marca (# Prompt 7 Sección 6).
+    Agrupa productos equivalentes (misma unidad base dentro de la tolerancia de contenido)
+    para comparar 'cualquier marca' y calcular indicadores de canasta básica estables.
+    """
+
+    class UnidadBase(models.TextChoices):
+        GRAMO = "g", "Gramos (g)"
+        MILILITRO = "ml", "Mililitros (ml)"
+        UNIDAD = "un", "Unidades (un)"
+
+    nombre = models.CharField("Nombre canónico genérico", max_length=150, unique=True, db_index=True)
+    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT, related_name="genericos")
+    subcategoria = models.CharField("Subcategoría", max_length=100, blank=True)
+    unidad_base = models.CharField("Unidad base", max_length=5, choices=UnidadBase.choices, default=UnidadBase.GRAMO)
+    contenido_base = models.DecimalField("Contenido base referencial (g/ml/un)", max_digits=12, decimal_places=2, default=Decimal("1000"))
+    tolerancia_pct = models.PositiveSmallIntegerField("Tolerancia de equivalencia (%)", default=5)
+    es_canasta_basica = models.BooleanField("Parte de la canasta básica", default=False, db_index=True)
+    es_a_granel = models.BooleanField("Producto a granel / sin marca", default=False)
+    descripcion = models.TextField("Descripción simple", blank=True)
+    activo = models.BooleanField(default=True, db_index=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Producto genérico"
+        verbose_name_plural = "Productos genéricos"
+        ordering = ["categoria__orden", "nombre"]
+
+    def __str__(self) -> str:
+        return self.nombre
+
+    def productos_equivalentes(self):
+        """Devuelve productos activos de este genérico dentro de la tolerancia de contenido (# Sección 6.2)."""
+        factor = Decimal(self.tolerancia_pct) / Decimal("100")
+        minimo = self.contenido_base * (Decimal("1") - factor)
+        maximo = self.contenido_base * (Decimal("1") + factor)
+        unidades_compat = {
+            "g": ["g", "kg"],
+            "ml": ["ml", "l"],
+            "un": ["un"],
+        }.get(self.unidad_base, ["un"])
+        return self.productos.filter(
+            activo=True,
+            descontinuado=False,
+            unidad_medida__in=unidades_compat,
+            contenido_base__gte=minimo,
+            contenido_base__lte=maximo,
+        ).select_related("marca", "categoria")
+
+
 class Producto(models.Model):
     """
     Producto del catálogo maestro (# REQ-01).
@@ -87,9 +139,49 @@ class Producto(models.Model):
     contenido_base = models.DecimalField(
         "Contenido en unidad base (g/ml/un)", max_digits=12, decimal_places=2, editable=False, default=Decimal("1")
     )
+    class TipoMarca(models.TextChoices):
+        MARCA = "MARCA", "Marca comercial"
+        MARCA_PROPIA = "MARCA_PROPIA", "Marca propia de comercio"
+        GENERICO_SIN_MARCA = "GENERICO_SIN_MARCA", "Genérico / sin marca (a granel)"
+
+    class EstadoBioequivalencia(models.TextChoices):
+        NO_APLICA = "NO_APLICA", "No aplica"
+        NO_VERIFICADO = "NO_VERIFICADO", "No verificado contra ISP"
+        CERTIFICADO_ISP = "CERTIFICADO_ISP", "Bioequivalente certificado (ISP)"
+
     es_canasta_basica = models.BooleanField("Parte de la canasta básica", default=False, db_index=True)
     es_estrella = models.BooleanField("Producto estrella", default=False, db_index=True)
     activo = models.BooleanField("Activo", default=True, db_index=True)
+    descontinuado = models.BooleanField("Descontinuado (conserva historial)", default=False, db_index=True)
+    generico = models.ForeignKey(
+        ProductoGenerico,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="productos",
+        verbose_name="Producto genérico canónico",
+    )
+    tipo_marca = models.CharField("Tipo de marca", max_length=25, choices=TipoMarca.choices, default=TipoMarca.MARCA)
+    marca_propia_de = models.ForeignKey(
+        "comercios.Comercio",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="productos_marca_propia",
+        verbose_name="Marca propia de",
+    )
+    # Medicamentos de venta directa — tratamiento prudente (# Sección 6.5)
+    es_medicamento_venta_directa = models.BooleanField("Medicamento de venta directa (sin receta)", default=False)
+    principio_activo = models.CharField("Principio activo", max_length=120, blank=True)
+    concentracion = models.CharField("Concentración", max_length=60, blank=True)
+    forma_farmaceutica = models.CharField("Forma farmacéutica", max_length=60, blank=True)
+    es_bioequivalente_certificado = models.CharField(
+        "Bioequivalencia ISP",
+        max_length=20,
+        choices=EstadoBioequivalencia.choices,
+        default=EstadoBioequivalencia.NO_APLICA,
+    )
+    fecha_consulta_isp = models.DateField("Fecha de verificación ISP", null=True, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
@@ -123,7 +215,7 @@ class Producto(models.Model):
 
     @property
     def contenido_legible(self) -> str:
-        val = self.contenido.normalize()
+        val = Decimal(str(self.contenido)).normalize()
         # Evitar notación científica en decimales enteros como 1E+2
         texto = format(val, "f").rstrip("0").rstrip(".") if "." in format(val, "f") else format(val, "f")
         return f"{texto} {self.get_unidad_medida_display()}"

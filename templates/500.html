@@ -2,10 +2,7 @@
 {% load static %}
 {% block titulo %}Ocurrió un problema (500) — Luca{% endblock %}
 {% block contenido %}
-<div class="max-w-lg mx-auto tarjeta-luca text-center space-y-4 py-8">
-  <img src="{% static 'img/marca/mascota-lucas-dormido.svg' %}" alt="Mascota Lucas descansando" class="w-32 mx-auto">
-  <h1 class="text-3xl">Tuvimos un inconveniente técnico</h1>
-  <p class="text-gris-700">Nuestro equipo ya fue notificado. Intenta recargar en unos segundos o regresa a la portada.</p>
-  <a href="/" class="btn-primario">Volver al inicio</a>
+<div class="max-w-lg mx-auto">
+  {% include "componentes/estado_vacio.html" with imagen="img/marca/mascota-lucas-dormido.svg" alt="Mascota Lucas descansando" titulo="Tuvimos un inconveniente técnico" descripcion="Nuestro equipo ya fue notificado. Intenta recargar en unos segundos o regresa a la portada." cta_url="/" cta_texto="Volver al inicio" %}
 </div>
 {% endblock %}

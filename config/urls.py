@@ -41,8 +41,9 @@ urlpatterns = [
     path("panel/", include("apps.panel.urls")),
     path("reportes/", include("apps.reportes.urls")),
     path("auditoria/", include("apps.auditoria.urls")),
+    path("superadmin/", include("apps.gobernanza.urls")),
     path("verificacion/", include("apps.verificacion.urls")),
-    path("admin/", admin.site.urls),
+    path(settings.DJANGO_ADMIN_URL, admin.site.urls),
 ]
 
 # En desarrollo local servimos SOLO `media/publico/`; `media/pendientes/` queda privado (# SEGURIDAD)

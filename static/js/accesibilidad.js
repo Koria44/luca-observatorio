@@ -19,7 +19,7 @@
     const btn = document.getElementById("btn-modo-oscuro");
     if (!btn) return;
     btn.setAttribute("aria-pressed", activo ? "true" : "false");
-    btn.textContent = activo ? "☀ Modo claro" : "🌙 Modo oscuro";
+    btn.textContent = activo ? "Modo claro" : "Modo oscuro";
   }
 
   function restaurarPreferencias() {

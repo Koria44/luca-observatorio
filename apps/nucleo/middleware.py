@@ -29,6 +29,27 @@ def obtener_ip_cliente(request) -> str:
     return request.META.get("REMOTE_ADDR", "127.0.0.1")
 
 
+def cerrar_sesiones_usuario(usuario) -> int:
+    """
+    Revoca todas las sesiones activas de `usuario` en `django_session` (# Prompt 8 Sección 4.2).
+    Debe invocarse al cambiar de rol, suspender o dar de baja una cuenta.
+    """
+    from django.contrib.sessions.models import Session
+    from django.utils import timezone
+
+    uid = str(usuario.pk)
+    cerradas = 0
+    for ses in Session.objects.filter(expire_date__gte=timezone.now()):
+        try:
+            datos = ses.get_decoded()
+        except Exception:
+            continue
+        if str(datos.get("_auth_user_id", "")) == uid:
+            ses.delete()
+            cerradas += 1
+    return cerradas
+
+
 class ControlSesionYLatidoMiddleware:
     """
     Aplica caducidad por inactividad según rol, verifica latido de sesión y agrega
@@ -43,11 +64,14 @@ class ControlSesionYLatidoMiddleware:
         es_autenticado = bool(usuario and usuario.is_authenticated)
 
         if es_autenticado:
-            es_staff = getattr(usuario, "rol", "") in ("FISCALIZADOR", "ADMIN") or usuario.is_superuser
+            rol_u = getattr(usuario, "rol", "")
+            es_sa = rol_u == "SUPERADMIN" or usuario.is_superuser
+            es_staff = es_sa or rol_u in ("FISCALIZADOR", "ADMIN")
             ahora = time.time()
 
-            # 1. Expiración por inactividad diferenciada (# II.7)
-            limite_inactividad = 900 if es_staff else 1800  # 15 min staff, 30 min resto
+            # 1. Expiración por inactividad diferenciada por rol (# II.7 / Prompt 8 Sección 4.2)
+            # SUPERADMIN: 10 min (600s); ADMIN / FISCALIZADOR: 15 min (900s); VECINO / COMERCIANTE: 30 min (1800s)
+            limite_inactividad = 600 if es_sa else (900 if es_staff else 1800)
             ultimo_acceso = request.session.get("ultimo_movimiento_ts")
             if ultimo_acceso is not None and (ahora - float(ultimo_acceso)) > limite_inactividad:
                 return self._cerrar_por_seguridad(

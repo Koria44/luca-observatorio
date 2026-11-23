@@ -58,10 +58,20 @@ class Precio(models.Model):
     class Estado(models.TextChoices):
         BORRADOR = "BORRADOR", "Borrador"
         PENDIENTE = "PENDIENTE", "Pendiente de revisión"
+        OBSERVADO = "OBSERVADO", "Observado (requiere aclaración)"
         PUBLICADO = "PUBLICADO", "Publicado"
         RECHAZADO = "RECHAZADO", "Rechazado"
         REEMPLAZADO = "REEMPLAZADO", "Reemplazado (histórico)"
         VENCIDO = "VENCIDO", "Vencido"
+        OCULTO = "OCULTO", "Oculto por medida de gobernanza"
+        RETIRADO = "RETIRADO", "Retirado por comercio"
+
+    class ReglaPublicacion(models.TextChoices):
+        SIN_PUBLICAR = "SIN_PUBLICAR", "Aún no publicado"
+        APROBACION_MANUAL = "APROBACION_MANUAL", "Aprobación manual municipal"
+        AUTOPUBLICACION_NIVEL_2 = "AUTOPUBLICACION_NIVEL_2", "Autopublicación Nivel 2 (Confiable)"
+        LEVANTAMIENTO_FISCALIZADOR = "LEVANTAMIENTO_FISCALIZADOR", "Levantamiento en terreno por fiscalizador"
+        DEMO_MIGRACION = "DEMO_MIGRACION", "Carga inicial de demostración"
 
     producto = models.ForeignKey(
         Producto, on_delete=models.PROTECT, related_name="precios", verbose_name="Producto"
@@ -123,6 +133,23 @@ class Precio(models.Model):
         related_name="reemplazado_por",
         verbose_name="Reemplaza a registro anterior",
     )
+    regla_publicacion = models.CharField(
+        "Regla de publicación (# Prompt 7)",
+        max_length=30,
+        choices=ReglaPublicacion.choices,
+        default=ReglaPublicacion.SIN_PUBLICAR,
+        db_index=True,
+    )
+    muestreo_terreno = models.BooleanField("Marcado para verificación en terreno (muestreo Nivel 2)", default=False)
+    tomado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="precios_tomados",
+        verbose_name="Tomado en revisión por",
+    )
+    tomado_hasta = models.DateTimeField("Bloqueo de toma de caso hasta", null=True, blank=True)
 
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)

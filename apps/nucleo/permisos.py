@@ -10,7 +10,7 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect
 
 
@@ -87,10 +87,47 @@ def comerciante_activo_requerido(vista):
 
 
 def solo_fiscalizador_o_admin(vista):
-    """Restringe la vista a fiscalizadores municipales y administradores DIDESE."""
-    return rol_requerido("FISCALIZADOR", "ADMIN")(vista)
+    """Restringe la vista a fiscalizadores municipales, administradores DIDESE y superadmin."""
+    return rol_requerido("FISCALIZADOR", "ADMIN", "SUPERADMIN")(vista)
 
 
 def solo_admin(vista):
-    """Restringe la vista exclusivamente a administradores DIDESE."""
-    return rol_requerido("ADMIN")(vista)
+    """Restringe la vista exclusivamente a administradores DIDESE y superadmin."""
+    return rol_requerido("ADMIN", "SUPERADMIN")(vista)
+
+
+def solo_superadmin(vista):
+    """
+    Restringe una vista EXCLUSIVAMENTE a cuentas SUPERADMIN activas (# Prompt 8 Sección 3 y 4).
+    # SEGURIDAD: Cualquier otro rol (incluido ADMIN DIDESE, FISCALIZADOR, COMERCIANTE, VECINO)
+    o usuario anónimo recibe HTTP 404 (no revelar existencia del módulo) y queda registrado
+    como evento `DENEGADO` en `RegistroAuditoria`.
+    """
+
+    @wraps(vista)
+    def envuelta(request, *args, **kwargs):
+        from apps.auditoria.models import RegistroAuditoria
+        from apps.auditoria.servicios import registrar_auditoria
+        from apps.nucleo.politicas import es_superadmin
+
+        usuario = getattr(request, "user", None)
+        if not es_superadmin(usuario):
+            registrar_auditoria(
+                usuario=usuario if (usuario and usuario.is_authenticated) else None,
+                accion=RegistroAuditoria.Accion.DENEGADO,
+                modelo="AccesoSuperadmin",
+                objeto_id=request.path[:64],
+                valores_nuevos={
+                    "ruta": request.path,
+                    "metodo": request.method,
+                    "rol": getattr(usuario, "rol", "ANONIMO") if (usuario and usuario.is_authenticated) else "ANONIMO",
+                },
+                motivo="Intento de acceso a ruta exclusiva de SUPERADMIN",
+                request=request,
+            )
+            if _es_peticion_api(request):
+                return JsonResponse({"error": "No encontrado."}, status=404)
+            raise Http404("Página no encontrada.")
+        return vista(request, *args, **kwargs)
+
+    return envuelta

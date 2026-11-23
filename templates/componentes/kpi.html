@@ -1,0 +1,9 @@
+{# Tarjeta KPI con contador accesible y tabular-nums (# Sección 4 / REQ-07) #}
+<div class="rounded-tarjeta {{ fondo|default:'bg-tinte-cielo' }} border border-tinta-900/10 shadow-nivel-2 p-5 space-y-1 {{ clase|default:'' }}">
+  <p class="text-xs font-bold uppercase tracking-wide {{ color_titulo|default:'text-tinta-700' }}">{{ titulo }}</p>
+  <p class="text-3xl sm:text-4xl precio-destacado {{ color_valor|default:'text-tinta-900' }}"
+     {% if animar %}data-contador="{{ valor_raw|default:valor }}" data-prefijo="{{ prefijo|default:'' }}" data-sufijo="{{ sufijo|default:'' }}"{% endif %}>
+    {{ prefijo|default:"" }}{{ valor }}{{ sufijo|default:"" }}
+  </p>
+  {% if detalle %}<p class="text-xs text-pizarra-600">{{ detalle }}</p>{% endif %}
+</div>

@@ -2,13 +2,8 @@
 {% load static %}
 {% block titulo %}Página no encontrada (404) — Luca{% endblock %}
 {% block contenido %}
-<div class="max-w-lg mx-auto tarjeta-luca text-center space-y-4 py-8">
-  <img src="{% static 'img/marca/mascota-lucas-buscando.svg' %}" alt="Mascota Lucas buscando la página" class="w-32 mx-auto">
-  <h1 class="text-3xl">No encontramos esa página</h1>
-  <p class="text-gris-700">Puede que el enlace esté desactualizado o mal escrito. Vuelve al inicio para seguir comparando precios en Pedro Aguirre Cerda.</p>
-  <div class="flex flex-wrap justify-center gap-3 pt-2">
-    <a href="{% url 'portal:inicio' %}" class="btn-primario">Volver al inicio</a>
-    <a href="{% url 'portal:buscar' %}" class="btn-secundario">Buscar productos</a>
-  </div>
+<div class="max-w-lg mx-auto">
+  {% url 'portal:inicio' as url_inicio %}
+  {% include "componentes/estado_vacio.html" with imagen="img/marca/mascota-lucas-buscando.svg" alt="Mascota Lucas buscando la página" titulo="No encontramos esa página" descripcion="Puede que el enlace esté desactualizado o mal escrito. Vuelve al inicio para seguir comparando precios en Pedro Aguirre Cerda." cta_url=url_inicio cta_texto="Volver al inicio" %}
 </div>
 {% endblock %}

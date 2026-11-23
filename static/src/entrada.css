@@ -1,10 +1,53 @@
 /*
  * Hoja de estilos fuente de Luca (Observatorio de Precios · Pedro Aguirre Cerda).
- * Paleta A "Almacén de barrio" — amigable, cálida y con color semántico.
- * Compilar en local con `npm run build:css` hacia `static/css/salida.css`.
+ * # ADR-006: Fuentes autoalojadas, tokens semánticos, movimiento con presupuesto,
+ * mejora progresiva (`html.js .revelar`), acordeón sin animar altura y View Transitions.
  * # REQ-11: Mobile-first (360 px) y objetivos táctiles >= 48 px.
- * # REQ-12: Accesibilidad WCAG 2.1 AA (foco visible, alto contraste, reduced-motion).
+ * # REQ-12: Accesibilidad WCAG 2.1 AA (foco visible, movimiento reducido en 2 niveles, modo oscuro).
  */
+
+/* Fuentes autoalojadas en static/fonts/ con font-display: swap (sin Google Fonts) */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/static/fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Baloo 2";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/static/fonts/baloo-2-latin-700-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Baloo 2";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/static/fonts/baloo-2-latin-800-normal.woff2") format("woff2");
+}
+
+/* Transiciones entre páginas como mejora progresiva (# Sección 2 / F7) */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+.vt-encabezado { view-transition-name: encabezado-luca; }
+.vt-logo { view-transition-name: logo-luca; }
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -32,66 +75,77 @@
   :focus-visible {
     outline: 3px solid #FFC53D;
     outline-offset: 3px;
-    border-radius: 6px;
+    border-radius: 8px;
   }
 }
 
 @layer components {
-  /* Botón de acción principal: Verde Ahorro (#0E7A55, contraste 5,34:1 con blanco) */
   .btn-primario {
     @apply inline-flex items-center justify-center gap-2 min-h-tactil px-6 py-3 rounded-full
            bg-ahorro-600 text-white font-titulo font-bold text-base
-           hover:bg-ahorro-700 hover:shadow-luca active:scale-[0.98] transition-all shadow-luca-suave
-           disabled:opacity-60 disabled:cursor-not-allowed;
+           hover:bg-ahorro-700 hover:-translate-y-0.5 hover:shadow-nivel-2
+           active:scale-[0.98] active:translate-y-0
+           transition-[transform,background-color,box-shadow] duration-150 ease-salida-suave
+           shadow-nivel-1 disabled:opacity-60 disabled:cursor-not-allowed;
   }
 
-  /* Botón institucional azul tinta (acciones de gestión / paneles) */
   .btn-tinta {
     @apply inline-flex items-center justify-center gap-2 min-h-tactil px-6 py-3 rounded-full
            bg-tinta-900 text-white font-titulo font-bold text-base
-           hover:bg-tinta-700 hover:shadow-luca active:scale-[0.98] transition-all shadow-luca-suave;
+           hover:bg-tinta-700 hover:-translate-y-0.5 hover:shadow-nivel-2
+           active:scale-[0.98] transition-[transform,background-color,box-shadow] duration-150 ease-salida-suave
+           shadow-nivel-1 disabled:opacity-60 disabled:cursor-not-allowed;
   }
 
-  /* Botón secundario cálido tipo píldora */
   .btn-secundario {
     @apply inline-flex items-center justify-center gap-2 min-h-tactil px-5 py-3 rounded-full
            bg-white text-tinta-900 border-2 border-tinta-900/20 font-titulo font-bold text-base
-           hover:border-tinta-900 hover:bg-tinta-100/50 active:scale-[0.98] transition-all;
+           hover:border-tinta-900 hover:bg-tinta-100/50 active:scale-[0.98]
+           transition-[transform,background-color,border-color] duration-150 ease-salida-suave
+           disabled:opacity-60 disabled:cursor-not-allowed;
   }
 
-  /* Botón acento dorado Luca (#FFC53D, contraste 9,01:1 con tinta-900) */
   .btn-acento {
     @apply inline-flex items-center justify-center gap-2 min-h-tactil px-6 py-3 rounded-full
            bg-luca-400 text-tinta-900 font-titulo font-extrabold text-base
-           hover:bg-luca-500 hover:text-white hover:shadow-luca active:scale-[0.98] transition-all shadow-luca-suave;
+           hover:bg-luca-500 hover:text-white hover:-translate-y-0.5 hover:shadow-nivel-2
+           active:scale-[0.98] transition-[transform,background-color,color,box-shadow] duration-150 ease-salida-suave
+           shadow-nivel-1 disabled:opacity-60 disabled:cursor-not-allowed;
   }
 
-  /* Botón oferta / urgencia amable tomate (#C2410C, contraste 5,18:1 con blanco) */
-  .btn-tomate {
+  .btn-tomate,
+  .btn-peligro {
     @apply inline-flex items-center justify-center gap-2 min-h-tactil px-5 py-3 rounded-full
            bg-tomate-600 text-white font-titulo font-bold text-base
-           hover:bg-tomate-500 hover:shadow-luca active:scale-[0.98] transition-all shadow-luca-suave;
+           hover:bg-tomate-500 hover:-translate-y-0.5 hover:shadow-nivel-2
+           active:scale-[0.98] transition-[transform,background-color,box-shadow] duration-150 ease-salida-suave
+           shadow-nivel-1 disabled:opacity-60 disabled:cursor-not-allowed;
   }
 
-  /* Tarjeta base con sombras suaves en capas y radios generosos */
+  .btn-fantasma {
+    @apply inline-flex items-center justify-center gap-2 min-h-tactil px-4 py-2.5 rounded-full
+           bg-transparent text-tinta-900 font-titulo font-bold text-base
+           hover:bg-crema-100 active:scale-[0.98]
+           transition-[transform,background-color] duration-150 ease-salida-suave;
+  }
+
   .tarjeta-luca {
-    @apply bg-white rounded-tarjeta border border-crema-200/80 shadow-luca p-5 sm:p-6;
+    @apply bg-white rounded-tarjeta border border-crema-200/80 shadow-nivel-2 p-5 sm:p-6;
   }
 
-  /* Variante interactiva con elevación sutil al pasar el cursor */
   .tarjeta-interactiva {
-    @apply tarjeta-luca hover:-translate-y-0.5 hover:shadow-luca-hover hover:border-tinta-900/20 transition-all duration-200;
+    @apply tarjeta-luca hover:-translate-y-0.5 hover:shadow-nivel-3 hover:border-ahorro-600/35
+           focus-within:border-ahorro-600/50 transition-[transform,box-shadow,border-color] duration-200 ease-salida-suave;
   }
 
-  /* Cintas y badges con color semántico */
   .cinta-mejor-precio {
     @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full
-           bg-ahorro-600 text-white font-titulo font-extrabold text-xs tracking-wide shadow-sm;
+           bg-ahorro-600 text-white font-titulo font-extrabold text-xs tracking-wide shadow-nivel-1;
   }
 
   .cinta-oferta {
     @apply inline-flex items-center gap-1 px-3 py-1 rounded-full
-           bg-tomate-600 text-white font-titulo font-extrabold text-xs tracking-wide shadow-sm;
+           bg-tomate-600 text-white font-titulo font-extrabold text-xs tracking-wide shadow-nivel-1;
   }
 
   .cinta-luca {
@@ -101,7 +155,8 @@
 
   .chip-filtro {
     @apply min-h-tactil inline-flex items-center gap-1.5 px-4 py-2 rounded-full
-           font-titulo font-bold text-sm transition-all border-2;
+           font-titulo font-bold text-sm transition-[background-color,border-color,color,transform]
+           duration-150 ease-salida-suave border-2 active:scale-[0.98];
   }
 
   .precio-destacado {
@@ -109,48 +164,97 @@
   }
 
   .campo-entrada {
-    @apply block w-full min-h-tactil px-4 py-2.5 rounded-2xl border-2 border-crema-200
+    @apply block w-full min-h-tactil px-4 py-2.5 rounded-md border-2 border-crema-200
            bg-white text-tinta-900 text-base shadow-inner
-           focus:border-ahorro-600 focus:ring-2 focus:ring-luca-400/60 transition-colors;
+           focus:border-ahorro-600 focus:ring-2 focus:ring-luca-400/60
+           transition-[border-color,box-shadow] duration-150;
   }
 
   .enlace-saltar {
     @apply sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50
-           focus:bg-luca-400 focus:text-tinta-900 focus:font-bold focus:px-4 focus:py-3 focus:rounded-full focus:shadow-lg;
+           focus:bg-luca-400 focus:text-tinta-900 focus:font-bold focus:px-4 focus:py-3 focus:rounded-full focus:shadow-nivel-3;
   }
 
-  /* Patrón sutil cálido para el hero principal */
   .hero-luca {
     background-image:
-      radial-gradient(circle at 92% 18%, rgba(255, 197, 61, 0.28) 0%, rgba(255, 197, 61, 0) 42%),
-      radial-gradient(circle at 8% 92%, rgba(14, 122, 85, 0.14) 0%, rgba(14, 122, 85, 0) 45%),
-      radial-gradient(rgba(27, 42, 74, 0.045) 1.5px, transparent 1.5px);
+      radial-gradient(circle at 92% 18%, rgba(255, 197, 61, 0.26) 0%, rgba(255, 197, 61, 0) 44%),
+      radial-gradient(circle at 8% 92%, rgba(14, 122, 85, 0.14) 0%, rgba(14, 122, 85, 0) 46%),
+      radial-gradient(rgba(27, 42, 74, 0.04) 1.5px, transparent 1.5px);
     background-size: 100% 100%, 100% 100%, 24px 24px;
+  }
+
+  /* Esqueleto con brillo controlado (solo mientras carga) */
+  .esqueleto-brillo {
+    background: linear-gradient(90deg, #F5EAD6 25%, #FFF8EC 50%, #F5EAD6 75%);
+    background-size: 200% 100%;
+    @apply rounded-md animate-brillo sin-anim:animate-none;
   }
 }
 
-/* Indicador vivo para "Abierta hoy" y flotación amable para Lucas */
-@keyframes pulso-suave {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.35); opacity: 0.65; }
+/* Encabezado compacto al hacer scroll (# Sección 4) */
+header.encabezado-compacto {
+  @apply shadow-nivel-2;
+}
+header.encabezado-compacto .encabezado-inner {
+  @apply py-1.5;
 }
 
-@keyframes flotar-suave {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
+/* Revelado progresivo: solo se oculta si hay JS y NO hay movimiento reducido (# Sección 3.2) */
+html.js:not([data-reducir-animaciones="true"]) .revelar {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 550ms cubic-bezier(0.22, 1, 0.36, 1), transform 550ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+html.js .revelar.visible {
+  opacity: 1;
+  transform: none;
 }
 
+/* Acordeón accesible sin animar height (# Sección 1 / 3.2) */
+.acordeon-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.acordeon-panel > div {
+  overflow: hidden;
+}
+[aria-expanded="true"] + .acordeon-panel {
+  grid-template-rows: 1fr;
+}
+[aria-expanded="true"] .acordeon-icono {
+  transform: rotate(180deg);
+}
+
+/* Imágenes blur-up suaves */
+.img-blur-up {
+  transition: opacity 260ms ease-out;
+}
+html.js .img-blur-up[data-cargando="1"] {
+  opacity: 0.25;
+}
+
+/* Check SVG que se dibuja en confirmaciones */
+.check-dibujar {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+}
+.check-dibujar.activo {
+  animation: dibujar 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Indicador vivo (máx. 3 pulsos en insignias o punto suave) */
 .punto-vivo {
   display: inline-block;
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 9999px;
   background-color: #0E7A55;
-  animation: pulso-suave 1.8s ease-in-out infinite;
 }
 
 .flotar-suave {
-  animation: flotar-suave 4s ease-in-out infinite;
+  @apply motion-safe:animate-flotar sin-anim:animate-none;
 }
 
 /* Modo oscuro amigable activable desde la barra superior (# REQ-12) */
@@ -327,7 +431,12 @@ html.modo-oscuro footer img[src*="luca-horizontal"] {
   border-radius: 0.9rem;
 }
 
-/* Respeto estricto a prefers-reduced-motion (# REQ-12) */
+html.modo-oscuro .esqueleto-brillo {
+  background: linear-gradient(90deg, #1E2C4A 25%, #2A3B5E 50%, #1E2C4A 75%);
+  background-size: 200% 100%;
+}
+
+/* Red de seguridad global de movimiento reducido en 2 niveles (# REQ-12 / Sección 3.2) */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -335,4 +444,21 @@ html.modo-oscuro footer img[src*="luca-horizontal"] {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+html[data-reducir-animaciones="true"] *,
+html[data-reducir-animaciones="true"] *::before,
+html[data-reducir-animaciones="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+html[data-reducir-animaciones="true"] .revelar {
+  opacity: 1 !important;
+  transform: none !important;
 }

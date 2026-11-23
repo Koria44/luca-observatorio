@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block titulo %}Panel Superadmin — Luca{% endblock %}
+{% block contenido %}
+<div class="space-y-6">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div class="space-y-1">
+      <span class="cinta-luca">Gobierno técnico y seguridad · Acceso exclusivo SUPERADMIN</span>
+      <h1 class="text-3xl sm:text-4xl">Panel Superadmin de Luca</h1>
+      <p class="text-sm text-pizarra-600">Sesión de 10 min · Auditoría exclusiva · Gestión de roles, sesiones y sistema.</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'auditoria:lista' %}" class="btn-tinta text-sm">Ver Registro de Auditoría ({{ total_auditoria }})</a>
+      <a href="{% url 'auditoria:lista' %}?verificar=1" class="btn-secundario text-sm">Verificar cadena SHA-256</a>
+    </div>
+  </div>
+
+  {# Indicadores de seguridad #}
+  <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="rounded-tarjeta bg-tinte-cielo border border-tinta-900/10 p-5">
+      <p class="text-xs font-bold uppercase text-tinta-700">Sesiones activas en BD</p>
+      <p class="text-3xl precio-destacado text-tinta-900">{{ sesiones_activas }}</p>
+    </div>
+    <div class="rounded-tarjeta bg-tinte-mantequilla border border-luca-400/50 p-5">
+      <p class="text-xs font-bold uppercase text-tinta-900">Eventos de auditoría</p>
+      <p class="text-3xl precio-destacado text-tinta-900">{{ total_auditoria }}</p>
+    </div>
+    <div class="rounded-tarjeta bg-tinte-durazno border border-tomate-600/20 p-5">
+      <p class="text-xs font-bold uppercase text-tomate-600">Accesos denegados registrados</p>
+      <p class="text-3xl precio-destacado text-tomate-600">{{ denegados_recientes }}</p>
+    </div>
+  </section>
+
+  {# Elevación temporal de 30 minutos para acciones operativas de negocio #}
+  <section class="tarjeta-luca space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <h2 class="text-xl">Elevación temporal para acciones operativas (máx. 30 min)</h2>
+        <p class="text-sm text-pizarra-600">Por defecto el Superadmin gobierna lo técnico y no ejecuta acciones operativas de DIDESE sin elevación explícita.</p>
+      </div>
+      {% if elevacion %}
+        <span class="px-3 py-1 rounded-full bg-ahorro-100 text-ahorro-700 font-bold text-xs">Activa hasta {{ elevacion.activa_hasta|date:"H:i" }}</span>
+      {% else %}
+        <span class="px-3 py-1 rounded-full bg-crema-200 text-pizarra-600 font-bold text-xs">Inactiva</span>
+      {% endif %}
+    </div>
+    {% if elevacion %}
+      <form method="post" action="{% url 'superadmin:elevacion' %}" class="flex items-center gap-3">
+        {% csrf_token %}
+        <input type="hidden" name="accion" value="revocar">
+        <p class="text-sm text-tinta-900">Motivo registrado: <strong>{{ elevacion.motivo }}</strong></p>
+        <button type="submit" class="btn-secundario text-sm">Revocar elevación ahora</button>
+      </form>
+    {% else %}
+      <form method="post" action="{% url 'superadmin:elevacion' %}" class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+        {% csrf_token %}
+        <input type="hidden" name="accion" value="activar">
+        <div class="sm:col-span-2">
+          <label for="elev-motivo" class="block text-xs font-bold mb-1">Motivo obligatorio (mín. 8 caracteres)</label>
+          <input id="elev-motivo" type="text" name="motivo" required minlength="8" placeholder="Ej. Contingencia operativa autorizada por DIDESE" class="campo-entrada">
+        </div>
+        <div>
+          <label for="elev-totp" class="block text-xs font-bold mb-1">Código TOTP (si está activo)</label>
+          <input id="elev-totp" type="text" name="codigo_totp" maxlength="6" placeholder="000000" class="campo-entrada">
+        </div>
+        <button type="submit" class="btn-acento">Activar 30 min</button>
+      </form>
+    {% endif %}
+  </section>
+
+  {# Interruptor general del sistema #}
+  <section class="tarjeta-luca space-y-3">
+    <h2 class="text-xl">Interruptor general de publicaciones (Kill Switch)</h2>
+    <p class="text-sm text-pizarra-600">Estado actual: <strong class="{% if cfg.kill_switch_global %}text-tomate-600{% else %}text-ahorro-700{% endif %}">{% if cfg.kill_switch_global %}PAUSADO{% else %}OPERATIVO{% endif %}</strong> (requiere elevación temporal activa).</p>
+    <form method="post" action="{% url 'superadmin:kill_switch' %}" class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+      {% csrf_token %}
+      <input type="hidden" name="activo" value="{% if cfg.kill_switch_global %}0{% else %}1{% endif %}">
+      <div class="sm:col-span-3">
+        <label for="ks-motivo" class="block text-xs font-bold mb-1">Motivo</label>
+        <input id="ks-motivo" type="text" name="motivo" required placeholder="Indica el fundamento del cambio" class="campo-entrada">
+      </div>
+      <button type="submit" class="btn-secundario">{% if cfg.kill_switch_global %}Reanudar publicaciones{% else %}Pausar publicaciones{% endif %}</button>
+    </form>
+  </section>
+
+  {# Gestión de usuarios y roles #}
+  <section class="tarjeta-luca space-y-3">
+    <h2 class="text-xl">Usuarios y roles del sistema</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm border-collapse">
+        <thead>
+          <tr class="border-b-2 border-tinta-900">
+            <th class="py-2 pr-3">Correo</th>
+            <th class="py-2 pr-3">Nombre</th>
+            <th class="py-2 pr-3">Rol</th>
+            <th class="py-2 pr-3">Estado</th>
+            <th class="py-2">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in usuarios %}
+            <tr class="border-b border-crema-200">
+              <td class="py-2 pr-3 font-semibold">{{ u.email }}</td>
+              <td class="py-2 pr-3">{{ u.nombre_completo }}</td>
+              <td class="py-2 pr-3"><span class="px-2 py-0.5 rounded-full bg-tinta-100 text-tinta-900 text-xs font-bold">{{ u.get_rol_display }}</span></td>
+              <td class="py-2 pr-3">{{ u.get_estado_cuenta_display }}</td>
+              <td class="py-2 flex flex-wrap gap-2 items-center">
+                {% if u.pk != user.pk %}
+                  <form method="post" action="{% url 'superadmin:cambiar_rol' u.pk %}" class="inline-flex gap-1 items-center">
+                    {% csrf_token %}
+                    <select name="nuevo_rol" aria-label="Nuevo rol para {{ u.email }}" class="campo-entrada !py-1 !px-2 text-xs w-auto">
+                      {% for cod, etiq in roles %}
+                        <option value="{{ cod }}" {% if u.rol == cod %}selected{% endif %}>{{ etiq }}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-secundario !py-1 !px-2.5 text-xs">Cambiar</button>
+                  </form>
+                  <form method="post" action="{% url 'superadmin:cerrar_sesiones' u.pk %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-secundario !py-1 !px-2.5 text-xs">Cerrar sesiones</button>
+                  </form>
+                {% else %}
+                  <span class="text-xs text-pizarra-600">(Tu cuenta)</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

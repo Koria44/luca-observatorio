@@ -217,6 +217,11 @@ def vista_comparar_producto(request, producto_id):
         for h in historico_qs
     ]
 
+    from apps.catalogo.genericos import AVISO_MEDICAMENTO_REFERENCIAL, obtener_equivalentes_y_mediana
+
+    modo_comparacion = request.GET.get("modo", "marca").strip()
+    equivalentes_data = obtener_equivalentes_y_mediana(producto)
+
     return render(
         request,
         "portal/comparar.html",
@@ -228,6 +233,9 @@ def vista_comparar_producto(request, producto_id):
             "serie_historial": serie_historial,
             "serie_historial_json": json.dumps(serie_historial, ensure_ascii=False),
             "orden": orden,
+            "modo_comparacion": modo_comparacion,
+            "equivalentes_data": equivalentes_data,
+            "aviso_medicamento": AVISO_MEDICAMENTO_REFERENCIAL if producto.es_medicamento_venta_directa else "",
         },
     )
 
@@ -335,3 +343,16 @@ def vista_contacto(request):
 def vista_privacidad(request):
     """Borrador de aviso de privacidad conforme a Ley 19.628 y actualización Ley 21.719 (# II.11)."""
     return render(request, "portal/privacidad.html")
+
+
+def vista_guia_estilo(request):
+    """Guía de estilo viva del sistema de diseño (# Sección 7). Visible solo en DEBUG o para ADMIN."""
+    from django.conf import settings
+    from django.http import Http404
+
+    es_admin = request.user.is_authenticated and (
+        request.user.is_superuser or getattr(request.user, "rol", "") == "ADMIN"
+    )
+    if not settings.DEBUG and not es_admin:
+        raise Http404()
+    return render(request, "portal/guia_de_estilo.html")

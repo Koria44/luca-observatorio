@@ -50,6 +50,49 @@
   </section>
   {% endwith %}
 
+  {# Aviso permanente para medicamentos de venta directa (# Prompt 7 Sección 6.5) #}
+  {% if aviso_medicamento %}
+  <div role="note" class="rounded-2xl bg-tinte-mantequilla border-l-4 border-luca-500 px-4 py-3 text-sm text-tinta-900 font-semibold">
+    <strong>Aviso de salud (venta directa):</strong> {{ aviso_medicamento }}
+    · Bioequivalencia ISP: <strong>{{ producto.get_es_bioequivalente_certificado_display }}</strong>.
+  </div>
+  {% endif %}
+
+  {# Conmutador Comparar por genérico (cualquier marca) vs solo esta marca (# Prompt 7 Sección 6.4) #}
+  {% if producto.generico and equivalentes_data.equivalentes %}
+  <section class="tarjeta-luca bg-tinte-cielo/40 border border-tinta-900/10 space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <span class="cinta-luca">Genérico: {{ producto.generico.nombre }}</span>
+        <h2 class="text-xl mt-1">Opciones equivalentes (cualquier marca)</h2>
+        {% if equivalentes_data.mediana_unidad %}
+          <p class="text-xs text-pizarra-600">Mediana comunal de equivalentes: <strong class="text-tinta-900">${{ equivalentes_data.mediana_unidad|intcomma }} / {{ producto.etiqueta_unidad_comparacion }}</strong></p>
+        {% endif %}
+      </div>
+      <div class="flex gap-2">
+        <a href="?orden={{ orden }}&modo=marca" class="chip-filtro !py-1.5 {% if modo_comparacion != 'generico' %}bg-tinta-900 text-white border-tinta-900{% else %}bg-white border-crema-200 text-tinta-900{% endif %}">Solo esta marca</a>
+        <a href="?orden={{ orden }}&modo=generico" class="chip-filtro !py-1.5 {% if modo_comparacion == 'generico' %}bg-ahorro-600 text-white border-ahorro-600{% else %}bg-white border-crema-200 text-tinta-900{% endif %}">Cualquier marca (genérico)</a>
+      </div>
+    </div>
+    {% if equivalentes_data.mas_barato_equivalente %}
+      {% with eq=equivalentes_data.mas_barato_equivalente %}
+      <div class="rounded-2xl bg-white p-3.5 border border-ahorro-600/40 flex flex-wrap items-center justify-between gap-2 text-sm">
+        <div>
+          <span class="cinta-mejor-precio">★ Más barato equivalente</span>
+          <strong class="ml-1 text-tinta-900">{{ eq.producto.nombre_completo }}</strong>
+          {% if eq.producto.tipo_marca != "MARCA" %}<span class="ml-1 px-2 py-0.5 rounded-full bg-luca-100 text-xs font-bold">{{ eq.producto.get_tipo_marca_display }}</span>{% endif %}
+          <p class="text-xs text-pizarra-600 mt-0.5">En {{ eq.sucursal.nombre_visible }} ({{ eq.sucursal.sector }})</p>
+        </div>
+        <div class="text-right">
+          <p class="text-2xl precio-destacado text-ahorro-600">${{ eq.precio_vigente|intcomma }}</p>
+          <a href="{% url 'portal:comparar' eq.producto.id %}" class="text-xs font-bold text-tinta-700 underline">Ver ficha →</a>
+        </div>
+      </div>
+      {% endwith %}
+    {% endif %}
+  </section>
+  {% endif %}
+
   {# Otros formatos del mismo producto (# REQ-01, REQ-04) #}
   {% if otros_formatos %}
   <div class="flex flex-wrap items-center gap-2 text-sm">

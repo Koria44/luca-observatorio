@@ -117,7 +117,42 @@ def registrar_o_actualizar_precio(
         alerta = es_variacion_atipica(valor_ant, valor_nuevo, umbral=40.0)
 
     es_staff = bool(registrado_por and getattr(registrado_por, "es_staff_observatorio", False))
-    publicar_directo = (es_staff or sucursal.comercio.comercio_confiable) and not alerta
+
+    # Control de Gobernanza en capa de servicio (# Prompt 7 Secciones 2 y 7)
+    from apps.gobernanza.models import ConfiguracionObservatorio, Habilitacion
+    from apps.nucleo.politicas import obtener_habilitacion_vigente, puede
+
+    cfg = ConfiguracionObservatorio.obtener()
+    if anterior:
+        valor_nuevo = precio_oferta or precio_normal
+        valor_ant = anterior.precio_vigente
+        alerta = es_variacion_atipica(valor_ant, valor_nuevo, umbral=float(cfg.umbral_variacion_pct or 40))
+
+    if not es_staff and fuente in (Precio.Fuente.COMERCIANTE, Precio.Fuente.CARGA_MASIVA):
+        if cfg.kill_switch_global or sucursal.comercio_id in (cfg.comercios_pausados or []):
+            raise ValidationError("Las publicaciones de precios están pausadas temporalmente por administración.")
+        if not puede(registrado_por, "publicar_precio", (sucursal, producto)):
+            raise ValidationError(
+                "Tu comercio no cuenta con una habilitación municipal vigente para publicar en esta categoría y sucursal."
+            )
+        hab = obtener_habilitacion_vigente(sucursal.comercio)
+        es_nivel_2 = bool(hab and hab.nivel >= Habilitacion.Nivel.CONFIABLE)
+        publicar_directo = es_nivel_2 and not alerta
+        regla_pub = (
+            Precio.ReglaPublicacion.AUTOPUBLICACION_NIVEL_2
+            if publicar_directo
+            else Precio.ReglaPublicacion.SIN_PUBLICAR
+        )
+        muestreo = bool(publicar_directo and (producto.id + sucursal.id) % 10 == 0)
+    else:
+        publicar_directo = es_staff and not alerta
+        regla_pub = (
+            Precio.ReglaPublicacion.LEVANTAMIENTO_FISCALIZADOR
+            if publicar_directo
+            else Precio.ReglaPublicacion.SIN_PUBLICAR
+        )
+        muestreo = False
+
     estado_inicial = Precio.Estado.PUBLICADO if publicar_directo else Precio.Estado.PENDIENTE
 
     nuevo = Precio.objects.create(
@@ -138,11 +173,13 @@ def registrar_o_actualizar_precio(
         stock_confirmado=stock_confirmado,
         estado=estado_inicial,
         registrado_por=registrado_por,
-        revisado_por=registrado_por if publicar_directo else None,
+        revisado_por=registrado_por if (publicar_directo and es_staff) else None,
         fecha_revision=timezone.now() if publicar_directo else None,
         alerta_variacion=alerta,
         variacion_porcentual=variacion,
         reemplaza=anterior,
+        regla_publicacion=regla_pub,
+        muestreo_terreno=muestreo,
     )
 
     # Si se publica inmediatamente, el anterior pasa a REEMPLAZADO sin borrarlo (# REQ-06)

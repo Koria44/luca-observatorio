@@ -5,30 +5,30 @@
 <div class="space-y-6">
   <div class="flex flex-wrap items-end justify-between gap-3">
     <div class="space-y-1">
-      <span class="cinta-oferta">Descuentos activos hoy</span>
-      <h1 class="text-3xl sm:text-4xl">Ofertas vigentes en Pedro Aguirre Cerda</h1>
+      {% include "componentes/insignia.html" with tipo="oferta" texto="Descuentos activos hoy" icono="tag" pulso=True %}
+      <h1 class="text-fluido-h1">Ofertas vigentes en Pedro Aguirre Cerda</h1>
       <p class="text-pizarra-600">Solo se muestran promociones activas hoy. Las ofertas vencidas desaparecen automáticamente.</p>
     </div>
-    <form method="get" class="flex gap-2">
-      <select name="categoria" aria-label="Filtrar ofertas por categoría" class="campo-entrada !py-2">
+    <form method="get" class="flex flex-wrap gap-2">
+      <select name="categoria" aria-label="Filtrar ofertas por categoría" class="campo-entrada w-auto">
         <option value="">Todas las categorías</option>
         {% for c in categorias %}
           <option value="{{ c.slug }}" {% if cat_slug == c.slug %}selected{% endif %}>{{ c.icono }} {{ c.nombre }}</option>
         {% endfor %}
       </select>
-      <button type="submit" class="btn-primario !py-2">Filtrar</button>
+      <button type="submit" class="btn-primario">Filtrar</button>
     </form>
   </div>
 
-  {# Chips rápidos de categoría #}
+  {# Chips rápidos de categoría con mínimo táctil 48px #}
   <div class="flex flex-wrap gap-2" role="navigation" aria-label="Filtro rápido de ofertas por categoría">
-    <a href="{% url 'portal:ofertas' %}" class="chip-filtro !py-1.5 {% if not cat_slug %}bg-tomate-600 text-white border-tomate-600{% else %}bg-white text-tinta-900 border-crema-200 hover:border-tomate-600{% endif %}">Todas</a>
+    <a href="{% url 'portal:ofertas' %}" class="chip-filtro {% if not cat_slug %}bg-tomate-600 text-white border-tomate-600{% else %}bg-white text-tinta-900 border-crema-200 hover:border-tomate-600{% endif %}">Todas</a>
     {% for c in categorias %}
-      <a href="?categoria={{ c.slug }}" class="chip-filtro !py-1.5 {% if cat_slug == c.slug %}bg-tomate-600 text-white border-tomate-600{% else %}bg-white text-tinta-900 border-crema-200 hover:border-tomate-600{% endif %}">{{ c.icono }} {{ c.nombre }}</a>
+      <a href="?categoria={{ c.slug }}" class="chip-filtro {% if cat_slug == c.slug %}bg-tomate-600 text-white border-tomate-600{% else %}bg-white text-tinta-900 border-crema-200 hover:border-tomate-600{% endif %}">{{ c.icono }} {{ c.nombre }}</a>
     {% endfor %}
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" data-auto-animar>
     {% for p in ofertas %}
     <article class="tarjeta-interactiva flex flex-col justify-between gap-3">
       <div class="space-y-2">
@@ -38,33 +38,30 @@
         </div>
         <h2 class="text-xl leading-snug"><a href="{% url 'portal:comparar' p.producto.id %}" class="hover:text-ahorro-600 transition-colors">{{ p.producto.nombre_completo }}</a></h2>
         <p class="text-sm text-pizarra-600">{{ p.sucursal.nombre_visible }} ({{ p.sucursal.sector }})</p>
-        {% for et in p.etiquetas_condiciones %}
-          <span class="inline-block text-xs font-bold bg-luca-100 text-tinta-900 px-2.5 py-0.5 rounded-full">⚠ {{ et }}</span>
-        {% endfor %}
+        <div class="flex flex-wrap gap-1.5">
+          {% for et in p.etiquetas_condiciones %}
+            <span class="inline-block text-xs font-bold bg-luca-100 text-tinta-900 px-2.5 py-0.5 rounded-full">{{ et }}</span>
+          {% endfor %}
+        </div>
       </div>
-      <div class="pt-3 border-t border-crema-200 flex items-end justify-between gap-2">
+      <div class="pt-3 border-t border-crema-200 flex flex-wrap items-end justify-between gap-2">
         <div>
           <p class="text-sm line-through text-pizarra-500 tabular-nums">${{ p.precio_normal|intcomma }}</p>
           <p class="text-3xl precio-destacado text-ahorro-600">${{ p.precio_oferta|intcomma }}</p>
         </div>
-        <div class="flex flex-wrap gap-1.5">
+        <div class="flex flex-wrap gap-2">
           {% if user.is_authenticated and user.rol == "VECINO" %}
-          <button type="button" data-agregar-canasta data-producto-id="{{ p.producto.id }}"
-            data-producto-nombre="{{ p.producto.nombre_completo }}" class="btn-acento !py-1.5 !px-3 text-xs">+ Lista</button>
+          <button type="button" data-agregar-canasta data-producto-id="{{ p.producto.id }}" data-producto-nombre="{{ p.producto.nombre_completo }}" class="btn-acento !px-3.5 text-sm">+ Lista</button>
           {% endif %}
-          <a href="https://wa.me/?text=Mira%20esta%20oferta%20en%20Luca%20PAC%3A%20{{ p.producto.nombre_completo|urlencode }}%20a%20%24{{ p.precio_oferta }}%20en%20{{ p.sucursal.nombre_visible|urlencode }}"
-            target="_blank" rel="noopener noreferrer"
-            class="btn-secundario !py-1.5 !px-3 text-xs !border-ahorro-600 !text-ahorro-700"
-            aria-label="Compartir oferta por WhatsApp">WA</a>
-          <a href="{% url 'portal:comparar' p.producto.id %}" class="btn-primario !py-1.5 !px-3.5 text-xs">Ver</a>
+          <a href="https://wa.me/?text=Mira%20esta%20oferta%20en%20Luca%20PAC%3A%20{{ p.producto.nombre_completo|urlencode }}%20a%20%24{{ p.precio_oferta }}%20en%20{{ p.sucursal.nombre_visible|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn-secundario !px-3.5 text-sm !border-ahorro-600 !text-ahorro-700" aria-label="Compartir oferta por WhatsApp">{% include "componentes/icono.html" with nombre="share-2" clase="w-4 h-4" %}<span>WA</span></a>
+          <a href="{% url 'portal:comparar' p.producto.id %}" class="btn-primario !px-4 text-sm">Ver</a>
         </div>
       </div>
     </article>
     {% empty %}
-      <div class="sm:col-span-2 lg:col-span-3 tarjeta-luca text-center space-y-3 py-10">
-        <img src="{% static 'img/marca/mascota-lucas-buscando.svg' %}" alt="Lucas buscando ofertas" class="w-28 mx-auto">
-        <h2 class="text-2xl">No hay ofertas activas en esta categoría hoy</h2>
-        <a href="{% url 'portal:ofertas' %}" class="btn-primario">Ver todas las ofertas</a>
+      <div class="sm:col-span-2 lg:col-span-3">
+        {% url 'portal:ofertas' as url_ofertas %}
+        {% include "componentes/estado_vacio.html" with titulo="No hay ofertas activas en esta categoría hoy" descripcion="Prueba ver todas las ofertas vigentes de la comuna." cta_url=url_ofertas cta_texto="Ver todas las ofertas" %}
       </div>
     {% endfor %}
   </div>

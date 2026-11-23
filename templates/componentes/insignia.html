@@ -1,0 +1,5 @@
+{# Insignia semántica reutilizable (# Sección 4 / REQ-12). Variantes: mejor, oferta, luca, info, error #}
+<span class="{% if tipo == 'mejor' %}cinta-mejor-precio{% elif tipo == 'oferta' %}cinta-oferta{% elif tipo == 'error' %}inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rojo-100 text-rojo-600 font-titulo font-extrabold text-xs{% elif tipo == 'info' %}inline-flex items-center gap-1 px-3 py-1 rounded-full bg-tinte-cielo text-tinta-900 font-titulo font-extrabold text-xs{% else %}cinta-luca{% endif %} {% if pulso %}motion-safe:animate-pulso-suave sin-anim:animate-none{% endif %} {{ clase|default:'' }}">
+  {% if icono %}{% include "componentes/icono.html" with nombre=icono clase="w-3.5 h-3.5" %}{% endif %}
+  <span>{{ texto }}</span>
+</span>

@@ -228,7 +228,7 @@ def calcular_optimizacion_canasta(
                     "producto_id": pid,
                     "nombre": prod.nombre_completo,
                     "cantidad": cant,
-                    "url_alerta": f"/mis-alertas/?producto={pid}",
+                    "url_alerta": f"/mi-canasta/alertas/?producto={pid}",
                 }
             )
             analisis_productos.append(
@@ -243,7 +243,7 @@ def calcular_optimizacion_canasta(
                     "promedio_unitario": 0,
                     "ahorro_vs_caro": 0,
                     "total_locales": 0,
-                    "url_alerta": f"/mis-alertas/?producto={pid}",
+                    "url_alerta": f"/mi-canasta/alertas/?producto={pid}",
                 }
             )
             continue
@@ -293,7 +293,7 @@ def calcular_optimizacion_canasta(
                 "promedio_unitario": promedio_unit,
                 "ahorro_vs_caro": ahorro_caro,
                 "total_locales": len(ofertas),
-                "url_comparar": f"/producto/{pid}/",
+                "url_comparar": f"/comparar/{pid}/",
             }
         )
 

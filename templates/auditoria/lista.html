@@ -4,11 +4,26 @@
 <div class="space-y-6">
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div>
-      <h1 class="text-3xl">Registro de auditoría (solo lectura)</h1>
-      <p class="text-gris-700">Bitácora inmutable de creaciones, modificaciones, aprobaciones, rechazos y accesos (# REQ-15).</p>
+      <span class="cinta-luca">Acceso exclusivo · SUPERADMIN</span>
+      <h1 class="text-3xl mt-1">Registro de auditoría (solo lectura)</h1>
+      <p class="text-pizarra-600">Bitácora inmutable encadenada SHA-256 de creaciones, modificaciones, aprobaciones, rechazos y accesos denegados (# REQ-15).</p>
     </div>
-    <a href="?accion={{ filtros.accion }}&modelo={{ filtros.modelo }}&usuario={{ filtros.usuario }}&desde={{ filtros.desde }}&exportar=csv" class="btn-secundario">⬇ Exportar CSV</a>
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'superadmin:panel' %}" class="btn-secundario">← Panel Superadmin</a>
+      <a href="?accion={{ filtros.accion }}&modelo={{ filtros.modelo }}&usuario={{ filtros.usuario }}&desde={{ filtros.desde }}&verificar=1" class="btn-tinta">Verificar integridad SHA-256</a>
+      <a href="?accion={{ filtros.accion }}&modelo={{ filtros.modelo }}&usuario={{ filtros.usuario }}&desde={{ filtros.desde }}&exportar=csv" class="btn-secundario">⬇ Exportar CSV</a>
+    </div>
   </div>
+
+  {% if integridad %}
+    <div class="tarjeta-luca {% if integridad.integro %}bg-tinte-menta border-ahorro-600/30{% else %}bg-rojo-100 border-rojo-600/30{% endif %}">
+      {% if integridad.integro %}
+        <p class="font-bold text-ahorro-700">✔ Cadena SHA-256 íntegra ({{ integridad.verificados }} registros verificados, 0 alteraciones detectadas).</p>
+      {% else %}
+        <p class="font-bold text-rojo-600">⚠ Alerta de integridad: se detectaron {{ integridad.registros_alterados|length }} registro(s) alterado(s): {{ integridad.registros_alterados }}.</p>
+      {% endif %}
+    </div>
+  {% endif %}
 
   <form method="get" class="tarjeta-luca grid grid-cols-1 sm:grid-cols-5 gap-3">
     <select name="accion" aria-label="Filtrar por acción" class="campo-entrada">

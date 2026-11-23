@@ -20,8 +20,8 @@
     </div>
   </div>
 
-  {# Filtros globales (# REQ-07) #}
-  <form method="get" class="tarjeta-luca grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+  {# Filtros globales en barra fija en escritorio (# REQ-07 / Sección 5) #}
+  <form method="get" class="tarjeta-luca lg:sticky lg:top-20 z-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
     <div>
       <label for="f-dias" class="block text-sm font-bold text-tinta-900 mb-1">Período</label>
       <select id="f-dias" name="dias" class="campo-entrada">
@@ -60,26 +60,26 @@
     <button type="submit" class="btn-primario">Aplicar filtros</button>
   </form>
 
-  {# Tarjetas KPI estilo Bento con tintes semánticos (# REQ-07) #}
+  {# Tarjetas KPI estilo Bento con contadores animados (# REQ-07 / Sección 5) #}
   <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
-    <div class="lg:col-span-4 rounded-tarjeta bg-tinte-menta border border-ahorro-600/20 shadow-luca p-5 sm:p-6 space-y-1">
+    <div class="lg:col-span-4 rounded-tarjeta bg-tinte-menta border border-ahorro-600/20 shadow-nivel-2 p-5 sm:p-6 space-y-1">
       <p class="text-xs font-bold uppercase tracking-wide text-ahorro-700">Canasta básica ({{ datos.kpis.canasta_items }} ítems)</p>
-      <p class="text-4xl precio-destacado text-tinta-900">${{ datos.kpis.canasta_prom|intcomma }}</p>
+      <p class="text-4xl precio-destacado text-tinta-900" data-contador="{{ datos.kpis.canasta_prom }}" data-prefijo="$">${{ datos.kpis.canasta_prom|intcomma }}</p>
       <p class="text-xs text-pizarra-600">Mín: <strong class="text-tinta-900">${{ datos.kpis.canasta_min|intcomma }}</strong> · Máx: <strong class="text-tinta-900">${{ datos.kpis.canasta_max|intcomma }}</strong></p>
     </div>
-    <div class="lg:col-span-3 rounded-tarjeta bg-tinte-cielo border border-tinta-900/10 shadow-luca p-5 space-y-1">
+    <div class="lg:col-span-3 rounded-tarjeta bg-tinte-cielo border border-tinta-900/10 shadow-nivel-2 p-5 space-y-1">
       <p class="text-xs font-bold uppercase tracking-wide text-tinta-700">Precio promedio</p>
-      <p class="text-3xl precio-destacado text-tinta-900">${{ datos.kpis.precio_promedio|intcomma }}</p>
+      <p class="text-3xl precio-destacado text-tinta-900" data-contador="{{ datos.kpis.precio_promedio }}" data-prefijo="$">${{ datos.kpis.precio_promedio|intcomma }}</p>
       <p class="text-xs text-pizarra-600">Mín: ${{ datos.kpis.precio_minimo|intcomma }} · Máx: ${{ datos.kpis.precio_maximo|intcomma }}</p>
     </div>
-    <div class="lg:col-span-2 rounded-tarjeta bg-tinte-durazno border border-tomate-600/20 shadow-luca p-5 space-y-1">
+    <div class="lg:col-span-2 rounded-tarjeta bg-tinte-durazno border border-tomate-600/20 shadow-nivel-2 p-5 space-y-1">
       <p class="text-xs font-bold uppercase tracking-wide text-tomate-600">Ofertas activas</p>
-      <p class="text-3xl precio-destacado text-tomate-600">{{ datos.kpis.ofertas_vigentes }}</p>
+      <p class="text-3xl precio-destacado text-tomate-600" data-contador="{{ datos.kpis.ofertas_vigentes }}">{{ datos.kpis.ofertas_vigentes }}</p>
       <p class="text-xs text-pizarra-600">{{ datos.kpis.productos_monitoreados }} productos</p>
     </div>
-    <div class="lg:col-span-3 rounded-tarjeta bg-tinte-mantequilla border border-luca-400/50 shadow-luca p-5 space-y-1">
+    <div class="lg:col-span-3 rounded-tarjeta bg-tinte-mantequilla border border-luca-400/50 shadow-nivel-2 p-5 space-y-1">
       <p class="text-xs font-bold uppercase tracking-wide text-tinta-900">Cobertura comunal PAC</p>
-      <p class="text-3xl precio-destacado text-ahorro-700">{{ datos.kpis.cobertura_sectores_pct }}%</p>
+      <p class="text-3xl precio-destacado text-ahorro-700" data-contador="{{ datos.kpis.cobertura_sectores_pct }}" data-sufijo="%">{{ datos.kpis.cobertura_sectores_pct }}%</p>
       <p class="text-xs text-pizarra-600">{{ datos.kpis.comercios_activos }} locales · Antig. prom. {{ datos.kpis.antiguedad_promedio_dias }} d</p>
     </div>
   </section>
@@ -127,7 +127,6 @@
         <a href="{% url 'cuentas:cola_revision' %}" class="btn-secundario !py-2 text-center">Comercios ({{ datos.tablas_trabajo.cuentas_pendientes }})</a>
         <a href="{% url 'precios:cola_revision' %}" class="btn-secundario !py-2 text-center">Precios ({{ datos.tablas_trabajo.precios_pendientes }})</a>
         <a href="{% url 'catalogo:lista' %}" class="btn-secundario !py-2 text-center">Catálogo maestro</a>
-        <a href="{% url 'auditoria:lista' %}" class="btn-secundario !py-2 text-center">Auditoría</a>
         <a href="/precios/carga-masiva/" class="btn-secundario !py-2 text-center">Carga masiva</a>
       </div>
       <div class="rounded-2xl bg-tinte-cielo px-4 py-2.5 text-xs text-tinta-900">

@@ -4,9 +4,10 @@
  */
 (function iniciarGraficosLuca() {
   if (typeof window.Chart === "undefined") return;
-  const sinAnimacion =
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-    document.documentElement.classList.contains("reducir-animaciones");
+  const sinAnimacion = window.LucaMovimiento
+    ? window.LucaMovimiento.prefiereMenosMovimiento()
+    : window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.getAttribute("data-reducir-animaciones") === "true";
 
   const PALETA_BARRAS = [
     "#0E7A55",

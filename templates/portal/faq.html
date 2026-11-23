@@ -1,19 +1,23 @@
 {% extends "base.html" %}
 {% block titulo %}Preguntas frecuentes — Luca{% endblock %}
 {% block contenido %}
-<div class="max-w-3xl mx-auto space-y-4">
-  <h1 class="text-3xl">Preguntas frecuentes</h1>
-  <details class="tarjeta-luca" open>
-    <summary class="font-titulo font-extrabold text-xl cursor-pointer">¿Necesito crear cuenta para buscar precios?</summary>
-    <p class="mt-2 text-gris-700">No. Buscar productos, comparar precios, ver ofertas y usar el mapa es 100 % público y gratuito para cualquier vecino.</p>
-  </details>
-  <details class="tarjeta-luca">
-    <summary class="font-titulo font-extrabold text-xl cursor-pointer">¿Por qué muestran el precio por kilo o litro?</summary>
-    <p class="mt-2 text-gris-700">Porque muchas veces una bolsa de 500 g parece más barata que una de 1 kg, pero al calcular el valor por kilo resulta más cara. Así puedes comparar de forma justa.</p>
-  </details>
-  <details class="tarjeta-luca">
-    <summary class="font-titulo font-extrabold text-xl cursor-pointer">¿Cómo registro mi almacén o negocio?</summary>
-    <p class="mt-2 text-gris-700">Ingresa a <a href="{% url 'cuentas:registro_comerciante' %}" class="underline font-bold text-marino-700">Registrar mi comercio</a>. Un fiscalizador verificará tus datos y luego DIDESE activará tu cuenta.</p>
-  </details>
+<div class="max-w-3xl mx-auto space-y-5">
+  <div class="space-y-1">
+    {% include "componentes/insignia.html" with tipo="luca" texto="Ayuda ciudadana · PAC" icono="info" %}
+    <h1 class="text-fluido-h1">Preguntas frecuentes</h1>
+    <p class="text-pizarra-600">Respuestas claras sobre cómo comparar precios, reportar diferencias o sumar tu negocio.</p>
+  </div>
+
+  <div class="space-y-3">
+    {% include "componentes/acordeon.html" with id="faq-1" titulo="¿Necesito crear cuenta para buscar precios?" contenido="No. Buscar productos, comparar precios, ver ofertas, revisar ferias abiertas y usar el mapa es 100 % público y gratuito para cualquier vecino." abierto=True %}
+    {% include "componentes/acordeon.html" with id="faq-2" titulo="¿Por qué muestran el precio por kilo o litro?" contenido="Porque muchas veces una bolsa de 500 g parece más barata que una de 1 kg, pero al calcular el valor por kilo resulta más cara. Así puedes comparar de forma justa." %}
+    {% include "componentes/acordeon.html" with id="faq-3" titulo="¿Cómo funciona Mi Lista de Compras?" contenido="Con tu cuenta de vecino agregas tus productos y Luca compara producto por producto para mostrarte si conviene comprar todo en 1 local o repartir entre 2 o 3 locales." %}
+    {% include "componentes/acordeon.html" with id="faq-4" titulo="¿Cómo registro mi almacén, feria o farmacia?" contenido="Ingresa a Registrar mi comercio desde el botón Ingresar. Un fiscalizador verificará tus datos y luego DIDESE activará tu cuenta sin costo." %}
+  </div>
+
+  <div class="tarjeta-luca flex flex-wrap items-center justify-between gap-3 bg-crema-50">
+    <p class="font-bold text-tinta-900">¿Tienes un comercio en Pedro Aguirre Cerda?</p>
+    <a href="{% url 'cuentas:registro_comerciante' %}" class="btn-primario text-sm">Registrar mi comercio</a>
+  </div>
 </div>
 {% endblock %}

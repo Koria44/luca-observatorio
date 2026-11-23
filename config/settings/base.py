@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "apps.panel",
     "apps.reportes",
     "apps.verificacion",
+    "apps.gobernanza",
 ]
 
 MIDDLEWARE = [
@@ -139,10 +140,9 @@ CONTENT_SECURITY_POLICY = {
         "style-src": [
             "'self'",
             "'unsafe-inline'",
-            "https://fonts.googleapis.com",
             "https://maps.geoapify.com",
         ],
-        "font-src": ["'self'", "https://fonts.gstatic.com", "https://maps.geoapify.com", "data:"],
+        "font-src": ["'self'", "https://maps.geoapify.com", "data:"],
         "img-src": [
             "'self'",
             "data:",
@@ -206,6 +206,11 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "no-responder@luca-pac
 # Modo demostración (solo habilitar en local o staging)
 DEMO_MODE = os.environ.get("DEMO_MODE", "False").lower() in ("1", "true", "yes", "si")
 CRON_SECRET = os.environ.get("CRON_SECRET", "")
+
+# Configuración de Superadmin, elevación temporal y admin técnico (# Prompt 8)
+SUPERADMIN_REQUIERE_ELEVACION = os.environ.get("SUPERADMIN_REQUIERE_ELEVACION", "True").lower() in ("1", "true", "yes", "si")
+SUPERADMIN_CORREO_CONTROL = os.environ.get("SUPERADMIN_CORREO_CONTROL", "control.didese@luca-pac.cl")
+DJANGO_ADMIN_URL = os.environ.get("DJANGO_ADMIN_URL", "interno-dj-8f4a2c/").strip("/") + "/"
 
 # Cabeceras de seguridad básicas (# REQ-16)
 SECURE_CONTENT_TYPE_NOSNIFF = True

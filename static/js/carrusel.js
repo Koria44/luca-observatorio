@@ -1,7 +1,7 @@
 /**
- * Carrusel accesible para banners de productos estrella y ofertas (# II.9 / REQ-12).
- * Soporta botón Pausa/Reproducir, flechas, puntos, teclado (ArrowLeft/ArrowRight),
- * pausa al enfocar y respeto estricto a `prefers-reduced-motion`.
+ * Carrusel accesible para banners destacados (# II.9 / REQ-12 / WCAG 2.2.2).
+ * Soporta botón Pausa/Reproducir, flechas, puntos, teclado, swipe táctil,
+ * pausa al enfocar / cambiar de pestaña y respeto estricto a `LucaMovimiento`.
  */
 (function iniciarCarrusel() {
   const carrusel = document.querySelector("[data-carrusel]");
@@ -14,9 +14,15 @@
   const btnPausa = carrusel.querySelector("[data-pausa]");
   if (slides.length <= 1) return;
 
+  const sinMovimiento = () =>
+    window.LucaMovimiento
+      ? window.LucaMovimiento.prefiereMenosMovimiento()
+      : window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        document.documentElement.getAttribute("data-reducir-animaciones") === "true";
+
   let indice = 0;
-  let pausado = window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-    document.documentElement.classList.contains("reducir-animaciones");
+  let pausado = sinMovimiento();
+  let touchX = 0;
 
   function mostrar(nuevo) {
     indice = (nuevo + slides.length) % slides.length;
@@ -26,14 +32,16 @@
     });
     puntos.forEach((p, i) => {
       p.setAttribute("aria-current", i === indice ? "true" : "false");
-      p.classList.toggle("bg-ambar-400", i === indice);
-      p.classList.toggle("bg-white/50", i !== indice);
+      p.classList.toggle("bg-ahorro-600", i === indice);
+      p.classList.toggle("bg-tinta-900/25", i !== indice);
     });
   }
 
   function actualizarBotonPausa() {
     if (!btnPausa) return;
-    btnPausa.textContent = pausado ? "▶ Reproducir" : "⏸ Pausar";
+    const span = btnPausa.querySelector("span");
+    if (span) span.textContent = pausado ? "Reproducir" : "Pausar";
+    else btnPausa.textContent = pausado ? "Reproducir" : "Pausar";
     btnPausa.setAttribute("aria-pressed", pausado ? "true" : "false");
   }
 
@@ -56,10 +64,34 @@
     actualizarBotonPausa();
   });
 
+  carrusel.addEventListener("touchstart", (ev) => {
+    touchX = ev.changedTouches[0]?.clientX || 0;
+  }, { passive: true });
+  carrusel.addEventListener("touchend", (ev) => {
+    const dx = (ev.changedTouches[0]?.clientX || 0) - touchX;
+    if (Math.abs(dx) > 45) mostrar(dx < 0 ? indice + 1 : indice - 1);
+  }, { passive: true });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      pausado = true;
+      actualizarBotonPausa();
+    }
+  });
+
+  if (window.LucaMovimiento) {
+    window.LucaMovimiento.suscribir((reducido) => {
+      if (reducido) {
+        pausado = true;
+        actualizarBotonPausa();
+      }
+    });
+  }
+
   actualizarBotonPausa();
   mostrar(0);
 
   setInterval(() => {
-    if (!pausado) mostrar(indice + 1);
+    if (!pausado && !document.hidden && !sinMovimiento()) mostrar(indice + 1);
   }, 6500);
 })();

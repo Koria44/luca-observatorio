@@ -44,26 +44,29 @@ class UsuarioManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("rol", Usuario.Rol.ADMIN)
+        extra_fields.setdefault("rol", Usuario.Rol.SUPERADMIN)
         extra_fields.setdefault("estado_cuenta", Usuario.EstadoCuenta.ACTIVA)
         return self.create_user(email, password, **extra_fields)
 
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
-    """Usuario de la plataforma Luca con clave primaria UUID y estados de cuenta."""
+    """Usuario de la plataforma Luca con clave primaria UUID y exactamente 5 roles (# Prompt 8)."""
 
     class Rol(models.TextChoices):
         VECINO = "VECINO", "Vecino/a"
         COMERCIANTE = "COMERCIANTE", "Comerciante"
         FISCALIZADOR = "FISCALIZADOR", "Fiscalizador municipal"
-        ADMIN = "ADMIN", "Administrador DIDESE"
+        ADMIN = "ADMIN", "Admin DIDESE"
+        SUPERADMIN = "SUPERADMIN", "Superadmin"
 
     class EstadoCuenta(models.TextChoices):
+        PENDIENTE_CORREO = "PENDIENTE_CORREO", "Pendiente de verificación de correo"
         PENDIENTE = "PENDIENTE", "Pendiente de revisión"
         VERIFICADA = "VERIFICADA", "Verificada por fiscalizador"
         ACTIVA = "ACTIVA", "Activa"
         RECHAZADA = "RECHAZADA", "Rechazada"
         SUSPENDIDA = "SUSPENDIDA", "Suspendida"
+        BAJA = "BAJA", "Dada de baja (anonimizada)"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField("Correo electrónico", unique=True, db_index=True)
@@ -117,6 +120,14 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         "Datos de solicitud de comercio", default=dict, blank=True
     )
 
+    # Verificación de correo y TOTP 2FA (# Prompt 7 Sección 1.4 y 5.1)
+    correo_verificado = models.BooleanField("Correo verificado", default=True)
+    token_verificacion_correo = models.CharField("Token verificación correo", max_length=64, blank=True)
+    token_verificacion_expira = models.DateTimeField("Expiración token correo", null=True, blank=True)
+    totp_secreto = models.CharField("Secreto TOTP (Base32)", max_length=64, blank=True)
+    totp_activo = models.BooleanField("Autenticación en dos pasos (TOTP) activa", default=False)
+    codigos_recuperacion = models.JSONField("Códigos de recuperación TOTP (hash)", default=list, blank=True)
+
     is_active = models.BooleanField("Activo en Django", default=True)
     is_staff = models.BooleanField("Acceso al panel técnico", default=False)
     creado_en = models.DateTimeField("Creado en", auto_now_add=True)
@@ -165,7 +176,26 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     @property
     def es_staff_observatorio(self) -> bool:
-        return self.rol in (self.Rol.FISCALIZADOR, self.Rol.ADMIN) or self.is_superuser
+        return self.rol in (self.Rol.FISCALIZADOR, self.Rol.ADMIN, self.Rol.SUPERADMIN) or self.is_superuser
+
+    @property
+    def es_superadmin(self) -> bool:
+        return self.rol == self.Rol.SUPERADMIN or self.is_superuser
+
+    def anonimizar_baja(self) -> None:
+        """Anonimiza datos personales al dar de baja la cuenta conservando integridad de auditoría (# Sección 8)."""
+        sufijo = str(self.id).split("-")[0]
+        self.email = f"baja-{sufijo}@anonimizado.luca-pac.cl"
+        self.nombres = "Usuario"
+        self.apellidos = "Anonimizado"
+        self.telefono = "+56900000000"
+        self.estado_cuenta = self.EstadoCuenta.BAJA
+        self.is_active = False
+        self.totp_activo = False
+        self.totp_secreto = ""
+        self.codigos_recuperacion = []
+        self.set_unusable_password()
+        self.save()
 
     def _notificar_cambio_estado(self, asunto: str, cuerpo: str) -> None:
         """Envía correo informativo al comerciante ante cada cambio de estado (# II.5)."""

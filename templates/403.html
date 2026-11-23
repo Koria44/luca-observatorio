@@ -2,13 +2,8 @@
 {% load static %}
 {% block titulo %}Acceso restringido (403) — Luca{% endblock %}
 {% block contenido %}
-<div class="max-w-lg mx-auto tarjeta-luca text-center space-y-4 py-8">
-  <img src="{% static 'img/marca/mascota-lucas-dormido.svg' %}" alt="Mascota Lucas indicando acceso restringido" class="w-32 mx-auto">
-  <h1 class="text-3xl">No tienes permiso para ver esta sección</h1>
-  <p class="text-gris-700">Esta función está reservada a un rol autorizado o al propietario del comercio.</p>
-  <div class="flex flex-wrap justify-center gap-3 pt-2">
-    <a href="{% url 'portal:inicio' %}" class="btn-primario">Ir al portal ciudadano</a>
-    <a href="{% url 'cuentas:ingresar' %}" class="btn-secundario">Cambiar de cuenta</a>
-  </div>
+<div class="max-w-lg mx-auto">
+  {% url 'portal:inicio' as url_inicio %}
+  {% include "componentes/estado_vacio.html" with imagen="img/marca/mascota-lucas-dormido.svg" alt="Mascota Lucas indicando acceso restringido" titulo="No tienes permiso para ver esta sección" descripcion="Esta función está reservada a un rol autorizado o al propietario del comercio." cta_url=url_inicio cta_texto="Ir al portal ciudadano" %}
 </div>
 {% endblock %}
